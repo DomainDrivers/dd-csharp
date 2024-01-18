@@ -20,4 +20,9 @@ public static class CollectionExtensions
         return collection
             .Aggregate(0, (hash, pair) => HashCode.Combine(hash, pair.GetHashCode()));
     }
+
+    public static string ToCollectionString<T>(this IEnumerable<T> enumerable)
+    {
+        return $"[{string.Join(", ", enumerable)}]";
+    }
 }

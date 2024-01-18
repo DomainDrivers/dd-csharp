@@ -8,13 +8,20 @@ public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceNam
 
     public Stage DependsOn(Stage stage)
     {
+        var newDependencies = new HashSet<Stage>(Dependencies) { stage };
         Dependencies.Add(stage);
-        return this;
+        return new Stage(StageName, newDependencies, Resources, Duration);
     }
 
     public string Name
     {
         get { return StageName; }
+    }
+
+    public Stage WithChosenResourceCapabilities(params ResourceName[] resources)
+    {
+        var collect = new HashSet<ResourceName>(resources);
+        return new Stage(StageName, Dependencies, collect, Duration);
     }
 
     public virtual bool Equals(Stage? other)
