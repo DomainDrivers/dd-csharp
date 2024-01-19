@@ -4,21 +4,21 @@ namespace DomainDrivers.SmartSchedule.Tests.Sorter;
 
 public class GraphTopologicalSortTest
 {
-    private static readonly GraphTopologicalSort GraphTopologicalSort = new GraphTopologicalSort();
+    private static readonly GraphTopologicalSort<string> GraphTopologicalSort = new GraphTopologicalSort<string>();
 
     [Fact]
     public void TestTopologicalSortWithSimpleDependencies()
     {
         //given
-        var node1 = new Node("Node1");
-        var node2 = new Node("Node2");
-        var node3 = new Node("Node3");
-        var node4 = new Node("Node4");
+        var node1 = new Node<string>("Node1");
+        var node2 = new Node<string>("Node2");
+        var node3 = new Node<string>("Node3");
+        var node4 = new Node<string>("Node4");
         node2 = node2.DependsOn(node1);
         node3 = node3.DependsOn(node1);
         node4 = node4.DependsOn(node2);
 
-        var nodes = new Nodes(node1, node2, node3, node4);
+        var nodes = new Nodes<string>(node1, node2, node3, node4);
 
         //when
         var sortedNodes = GraphTopologicalSort.Sort(nodes);
@@ -41,17 +41,17 @@ public class GraphTopologicalSortTest
     public void TestTopologicalSortWithLinearDependencies()
     {
         //given
-        var node1 = new Node("Node1");
-        var node2 = new Node("Node2");
-        var node3 = new Node("Node3");
-        var node4 = new Node("Node4");
-        var node5 = new Node("Node5");
+        var node1 = new Node<string>("Node1");
+        var node2 = new Node<string>("Node2");
+        var node3 = new Node<string>("Node3");
+        var node4 = new Node<string>("Node4");
+        var node5 = new Node<string>("Node5");
         node1 = node1.DependsOn(node2);
         node2 = node2.DependsOn(node3);
         node3 = node3.DependsOn(node4);
         node4 = node4.DependsOn(node5);
 
-        var nodes = new Nodes(node1, node2, node3, node4, node5);
+        var nodes = new Nodes<string>(node1, node2, node3, node4, node5);
 
         //when
         var sortedNodes = GraphTopologicalSort.Sort(nodes);
@@ -79,9 +79,9 @@ public class GraphTopologicalSortTest
     public void TestNodesWithoutDependencies()
     {
         //given
-        var node1 = new Node("Node1");
-        var node2 = new Node("Node2");
-        var nodes = new Nodes(node1, node2);
+        var node1 = new Node<string>("Node1");
+        var node2 = new Node<string>("Node2");
+        var nodes = new Nodes<string>(node1, node2);
 
         //when
         var sortedNodes = GraphTopologicalSort.Sort(nodes);
@@ -94,11 +94,11 @@ public class GraphTopologicalSortTest
     public void TestCyclicDependency()
     {
         //given
-        var node1 = new Node("Node1");
-        var node2 = new Node("Node2");
+        var node1 = new Node<string>("Node1");
+        var node2 = new Node<string>("Node2");
         node2 = node2.DependsOn(node1);
         node1 = node1.DependsOn(node2); // Making it cyclic
-        var nodes = new Nodes(node1, node2);
+        var nodes = new Nodes<string>(node1, node2);
 
         //when
         var sortedNodes = GraphTopologicalSort.Sort(nodes);

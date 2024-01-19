@@ -1,23 +1,22 @@
-﻿using DomainDrivers.SmartSchedule.Planning.Parallelization;
-
+﻿
 namespace DomainDrivers.SmartSchedule.Sorter;
 
-public record Node(string Name, Nodes Dependencies, Stage? Content)
+public record Node<T>(string Name, Nodes<T> Dependencies, T? Content)
 {
-    public Node(string name) : this(name, new Nodes(new HashSet<Node>()), null)
+    public Node(string name) : this(name, new Nodes<T>(new HashSet<Node<T>>()), default)
     {
     }
 
-    public Node(string name, Stage? content) : this(name, new Nodes(new HashSet<Node>()), content)
+    public Node(string name, T? content) : this(name, new Nodes<T>(new HashSet<Node<T>>()), content)
     {
     }
 
-    public Node DependsOn(Node node)
+    public Node<T> DependsOn(Node<T> node)
     {
-        return new Node(Name, Dependencies.Add(node), Content);
+        return new Node<T>(Name, Dependencies.Add(node), Content);
     }
 
-    public virtual bool Equals(Node? other)
+    public virtual bool Equals(Node<T>? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;

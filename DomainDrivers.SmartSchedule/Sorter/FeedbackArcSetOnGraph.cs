@@ -2,7 +2,7 @@
 
 public class FeedbackArcSetOnGraph
 {
-    public static IList<Edge> Calculate(IList<Node> initialNodes)
+    public static IList<Edge> Calculate(IList<Node<string>> initialNodes)
     {
         var adjacencyList = CreateAdjacencyList(initialNodes);
         var v = adjacencyList.Count;
@@ -32,7 +32,7 @@ public class FeedbackArcSetOnGraph
         return feedbackEdges;
     }
 
-    private static Dictionary<int, IList<int>> CreateAdjacencyList(IList<Node> initialNodes)
+    private static Dictionary<int, IList<int>> CreateAdjacencyList(IList<Node<string>> initialNodes)
     {
         var adjacencyList = new Dictionary<int, IList<int>>();
 

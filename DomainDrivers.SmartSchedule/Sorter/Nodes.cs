@@ -3,38 +3,38 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Sorter;
 
-public record Nodes(ISet<Node> NodesCollection)
+public record Nodes<T>(ISet<Node<T>> NodesCollection)
 {
-    public Nodes(params Node[] nodes) : this(new HashSet<Node>(nodes))
+    public Nodes(params Node<T>[] nodes) : this(new HashSet<Node<T>>(nodes))
     {
     }
 
-    public ISet<Node> All
+    public ISet<Node<T>> All
     {
         get { return NodesCollection.ToFrozenSet(); }
     }
 
-    public Nodes Add(Node node)
+    public Nodes<T> Add(Node<T> node)
     {
-        var newNodes = new HashSet<Node>(NodesCollection) { node };
-        return new Nodes(newNodes);
+        var newNodes = new HashSet<Node<T>>(NodesCollection) { node };
+        return new Nodes<T>(newNodes);
     }
 
-    public Nodes WithAllDependenciesPresentIn(IEnumerable<Node> nodes)
+    public Nodes<T> WithAllDependenciesPresentIn(IEnumerable<Node<T>> nodes)
     {
-        return new Nodes(All
+        return new Nodes<T>(All
             .Where(n => n.Dependencies.All.All(d => nodes.Contains(d)))
             .ToHashSet());
     }
 
-    public Nodes RemoveAll(IEnumerable<Node> nodes)
+    public Nodes<T> RemoveAll(IEnumerable<Node<T>> nodes)
     {
-        return new Nodes(All
+        return new Nodes<T>(All
             .Where(n => !nodes.Contains(n))
             .ToHashSet());
     }
 
-    public virtual bool Equals(Nodes? other)
+    public virtual bool Equals(Nodes<T>? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;

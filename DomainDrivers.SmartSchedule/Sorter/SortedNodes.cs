@@ -2,20 +2,20 @@
 
 namespace DomainDrivers.SmartSchedule.Sorter;
 
-public record SortedNodes(IList<Nodes> All)
+public record SortedNodes<T>(IList<Nodes<T>> All)
 {
-    public static SortedNodes Empty()
+    public static SortedNodes<T> Empty()
     {
-        return new SortedNodes(new List<Nodes>());
+        return new SortedNodes<T>(new List<Nodes<T>>());
     }
 
-    public SortedNodes Add(Nodes newNodes)
+    public SortedNodes<T> Add(Nodes<T> newNodes)
     {
-        var result = new List<Nodes>(All) { newNodes };
-        return new SortedNodes(result);
+        var result = new List<Nodes<T>>(All) { newNodes };
+        return new SortedNodes<T>(result);
     }
 
-    public virtual bool Equals(SortedNodes? other)
+    public virtual bool Equals(SortedNodes<T>? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
