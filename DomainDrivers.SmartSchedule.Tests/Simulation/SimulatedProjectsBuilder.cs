@@ -7,7 +7,7 @@ public class SimulatedProjectsBuilder
     private ProjectId? _currentId;
     private readonly IList<ProjectId> _simulatedProjects = new List<ProjectId>();
     private readonly IDictionary<ProjectId, Demands> _simulatedDemands = new Dictionary<ProjectId, Demands>();
-    private readonly IDictionary<ProjectId, decimal> _simulatedEarnings = new Dictionary<ProjectId, decimal>();
+    private readonly IDictionary<ProjectId, Func<decimal>> _values = new Dictionary<ProjectId, Func<decimal>>();
 
     public SimulatedProjectsBuilder WithProject(ProjectId id)
     {
@@ -24,14 +24,20 @@ public class SimulatedProjectsBuilder
 
     public SimulatedProjectsBuilder ThatCanEarn(decimal earnings)
     {
-        _simulatedEarnings[_currentId!] = earnings;
+        _values[_currentId!] = () => earnings;
+        return this;
+    }
+
+    public SimulatedProjectsBuilder ThatCanGenerateReputationLoss(int factor)
+    {
+        _values[_currentId!] = () => factor;
         return this;
     }
 
     public List<SimulatedProject> Build()
     {
         return _simulatedProjects
-            .Select(id => new SimulatedProject(id, _simulatedEarnings[id], _simulatedDemands[id]))
+            .Select(id => new SimulatedProject(id, _values[id], _simulatedDemands[id]))
             .ToList();
     }
 }

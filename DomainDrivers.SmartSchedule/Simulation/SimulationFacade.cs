@@ -14,7 +14,8 @@ public class SimulationFacade
     public Result WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
         IList<SimulatedProject> projectsSimulations, SimulatedCapabilities totalCapability)
     {
-        return _optimizationFacade.Calculate(ToItems(projectsSimulations), ToCapacity(totalCapability));
+        return _optimizationFacade.Calculate(ToItems(projectsSimulations), ToCapacity(totalCapability),
+            Comparer<Item>.Create((x, y) => y.Value.CompareTo(x.Value)));
     }
 
     private TotalCapacity ToCapacity(SimulatedCapabilities simulatedCapabilities)
@@ -36,6 +37,6 @@ public class SimulationFacade
         var missingDemands = simulatedProject.MissingDemands.All;
         IList<IWeightDimension> weights = new List<IWeightDimension>(missingDemands);
         return new Item(simulatedProject.ProjectId.ToString(),
-            decimal.ToDouble(simulatedProject.Earnings), new TotalWeight(weights));
+            decimal.ToDouble(simulatedProject.CalculateValue()), new TotalWeight(weights));
     }
 }

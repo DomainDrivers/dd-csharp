@@ -4,6 +4,11 @@ public class OptimizationFacade
 {
     public Result Calculate(IList<Item> items, TotalCapacity totalCapacity)
     {
+        return Calculate(items, totalCapacity, Comparer<Item>.Create((x, y) => y.Value.CompareTo(x.Value)));
+    }
+
+    public Result Calculate(IList<Item> items, TotalCapacity totalCapacity, Comparer<Item> comparator)
+    {
         var capacitiesSize = totalCapacity.Size;
         var dp = new double[capacitiesSize + 1];
         var chosenItemsList = new List<Item>[capacitiesSize + 1];
@@ -25,7 +30,7 @@ public class OptimizationFacade
         var itemToCapacitiesMap =
             new Dictionary<Item, ISet<ICapacityDimension>>();
 
-        foreach (var item in items.OrderByDescending(item => item.Value).ToList())
+        foreach (var item in items.Order(comparator).ToList())
         {
             var chosenCapacities = MatchCapacities(item.TotalWeight, allCapacities);
             allCapacities = allCapacities.Except(chosenCapacities).ToList();

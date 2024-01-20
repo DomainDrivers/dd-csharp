@@ -120,6 +120,35 @@ public class SimulationScenarios
         Assert.Equal(108d, resultWithExtraResource.Profit);
     }
 
+    [Fact]
+    public void PicksOptimalProjectBasedOnReputation()
+    {
+        //given
+        var simulatedProjects = SimulatedProjects()
+            .WithProject(Project1)
+            .ThatRequires(DemandFor(Skill("JAVA-MID"), Jan1))
+            .ThatCanGenerateReputationLoss(100)
+            .WithProject(Project2)
+            .ThatRequires(DemandFor(Skill("JAVA-MID"), Jan1))
+            .ThatCanGenerateReputationLoss(40)
+            .Build();
+
+        //and there are
+        var simulatedAvailability = SimulatedCapabilities()
+            .WithEmployee(Staszek)
+            .ThatBrings(Skill("JAVA-MID"))
+            .ThatIsAvailableAt(Jan1)
+            .Build();
+
+        //when
+        var result =
+            _simulationFacade.WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(simulatedProjects,
+                simulatedAvailability);
+
+        //then
+        Assert.Equal(Project1.ToString(), result.ChosenItems[0].Name);
+    }
+
     private static SimulatedProjectsBuilder SimulatedProjects()
     {
         return new SimulatedProjectsBuilder();
