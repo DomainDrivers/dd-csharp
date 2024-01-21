@@ -2,7 +2,7 @@ using DomainDrivers.SmartSchedule.Optimization;
 using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
 using static DomainDrivers.SmartSchedule.Simulation.Demand;
-using static DomainDrivers.SmartSchedule.Simulation.Capability;
+using static DomainDrivers.SmartSchedule.Shared.Capability;
 
 namespace DomainDrivers.SmartSchedule.Tests.Simulation;
 
@@ -45,7 +45,7 @@ public class SimulationScenarios
 
         //when
         var result =
-            _simulationFacade.WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(simulatedProjects,
+            _simulationFacade.WhatIsTheOptimalSetup(simulatedProjects,
                 simulatedAvailability);
 
         //then
@@ -75,7 +75,7 @@ public class SimulationScenarios
 
         //when
         var result =
-            _simulationFacade.WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(simulatedProjects,
+            _simulationFacade.WhatIsTheOptimalSetup(simulatedProjects,
                 simulatedAvailability);
 
         //then
@@ -109,10 +109,10 @@ public class SimulationScenarios
 
         //when
         var resultWithoutExtraResource =
-            _simulationFacade.WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(simulatedProjects,
+            _simulationFacade.WhatIsTheOptimalSetup(simulatedProjects,
                 simulatedAvailability);
         var resultWithExtraResource =
-            _simulationFacade.WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(simulatedProjects,
+            _simulationFacade.WhatIsTheOptimalSetup(simulatedProjects,
                 simulatedAvailability.Add(extraCapability));
 
         //then
@@ -142,7 +142,7 @@ public class SimulationScenarios
 
         //when
         var result =
-            _simulationFacade.WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(simulatedProjects,
+            _simulationFacade.WhatIsTheOptimalSetup(simulatedProjects,
                 simulatedAvailability);
 
         //then

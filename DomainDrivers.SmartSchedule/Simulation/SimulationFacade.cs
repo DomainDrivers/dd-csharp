@@ -23,7 +23,7 @@ public class SimulationFacade
         return resultWith.Profit - decimal.ToDouble(newPricedCapability.Value) - resultWithout.Profit;
     }
 
-    public Result WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
+    public Result WhatIsTheOptimalSetup(
         IList<SimulatedProject> projectsSimulations, SimulatedCapabilities totalCapability)
     {
         return _optimizationFacade.Calculate(ToItems(projectsSimulations), ToCapacity(totalCapability),

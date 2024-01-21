@@ -6,4 +6,9 @@ public record ProjectId(Guid Id)
     {
         return new ProjectId(Guid.NewGuid());
     }
+
+    public static ProjectId From(Guid key)
+    {
+        return new ProjectId(key);
+    }
 }

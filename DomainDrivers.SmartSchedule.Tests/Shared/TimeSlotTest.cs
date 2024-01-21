@@ -1,4 +1,5 @@
 using DomainDrivers.SmartSchedule.Shared;
+using NUnit.Framework.Legacy;
 
 namespace DomainDrivers.SmartSchedule.Tests.Shared;
 
@@ -77,5 +78,107 @@ public class TimeSlotTest
 
         //expect
         Assert.True(slot1.Within(slot1));
+    }
+
+    [Fact]
+    public void SlotsOverlapping()
+    {
+        //given
+        var slot1 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+        var slot2 = new TimeSlot(DateTime.Parse("2022-01-05T00:00:00Z"), DateTime.Parse("2022-01-15T00:00:00Z"));
+        var slot3 = new TimeSlot(DateTime.Parse("2022-01-10T00:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+        var slot4 = new TimeSlot(DateTime.Parse("2022-01-05T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+        var slot5 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+
+        //expect
+        Assert.True(slot1.OverlapsWith(slot2));
+        Assert.True(slot1.OverlapsWith(slot1));
+        Assert.True(slot1.OverlapsWith(slot3));
+        Assert.True(slot1.OverlapsWith(slot4));
+        Assert.True(slot1.OverlapsWith(slot5));
+    }
+
+    [Fact]
+    public void SlotsNotOverlapping()
+    {
+        //given
+        var slot1 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+        var slot2 = new TimeSlot(DateTime.Parse("2022-01-10T01:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+        var slot3 = new TimeSlot(DateTime.Parse("2022-01-11T00:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+
+        //expect
+        Assert.False(slot1.OverlapsWith(slot2));
+        Assert.False(slot1.OverlapsWith(slot3));
+    }
+
+    [Fact]
+    public void RemovingCommonPartsShouldHaveNoEffectWhenThereIsNoOverlap()
+    {
+        //given
+        var slot1 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+        var slot2 = new TimeSlot(DateTime.Parse("2022-01-15T00:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+
+        //expect
+        CollectionAssert.IsSubsetOf(new List<TimeSlot> { slot1, slot2 }, slot1.LeftoverAfterRemovingCommonWith(slot2));
+    }
+
+    [Fact]
+    public void RemovingCommonPartsWhenThereIsFullOverlap()
+    {
+        //given
+        var slot1 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+
+        //expect
+        Assert.Empty(slot1.LeftoverAfterRemovingCommonWith(slot1));
+    }
+
+    [Fact]
+    public void RemovingCommonPartsWhenThereIsOverlap()
+    {
+        //given
+        var slot1 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-15T00:00:00Z"));
+        var slot2 = new TimeSlot(DateTime.Parse("2022-01-10T00:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+
+        //when
+        var difference = slot1.LeftoverAfterRemovingCommonWith(slot2);
+
+        //then
+        Assert.Equal(2, difference.Count);
+        Assert.Equal(DateTime.Parse("2022-01-01T00:00:00Z"), difference[0].From);
+        Assert.Equal(DateTime.Parse("2022-01-10T00:00:00Z"), difference[0].To);
+        Assert.Equal(DateTime.Parse("2022-01-15T00:00:00Z"), difference[1].From);
+        Assert.Equal(DateTime.Parse("2022-01-20T00:00:00Z"), difference[1].To);
+
+        //given
+        var slot3 = new TimeSlot(DateTime.Parse("2022-01-05T00:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+        var slot4 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-10T00:00:00Z"));
+
+        //when
+        var difference2 = slot3.LeftoverAfterRemovingCommonWith(slot4);
+
+        //then
+        Assert.Equal(2, difference2.Count);
+        Assert.Equal(DateTime.Parse("2022-01-01T00:00:00Z"), difference2[0].From);
+        Assert.Equal(DateTime.Parse("2022-01-05T00:00:00Z"), difference2[0].To);
+        Assert.Equal(DateTime.Parse("2022-01-10T00:00:00Z"), difference2[1].From);
+        Assert.Equal(DateTime.Parse("2022-01-20T00:00:00Z"), difference2[1].To);
+    }
+
+    [Fact]
+    public void RemovingCommonPartWhenOneSlotInFullyWithinAnother()
+    {
+        // given
+        var slot1 = new TimeSlot(DateTime.Parse("2022-01-01T00:00:00Z"), DateTime.Parse("2022-01-20T00:00:00Z"));
+        var slot2 = new TimeSlot(DateTime.Parse("2022-01-10T00:00:00Z"), DateTime.Parse("2022-01-15T00:00:00Z"));
+
+        // when
+        var difference = slot1.LeftoverAfterRemovingCommonWith(slot2);
+
+        // then
+        Assert.Equal(2, difference.Count);
+        Assert.Equal(DateTime.Parse("2022-01-01T00:00:00Z"), difference[0].From);
+        Assert.Equal(DateTime.Parse("2022-01-10T00:00:00Z"), difference[0].To);
+        Assert.Equal(DateTime.Parse("2022-01-15T00:00:00Z"), difference[1].From);
+        Assert.Equal(DateTime.Parse("2022-01-20T00:00:00Z"), difference[1].To);
     }
 }

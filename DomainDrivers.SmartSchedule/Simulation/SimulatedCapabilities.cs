@@ -4,6 +4,11 @@ namespace DomainDrivers.SmartSchedule.Simulation;
 
 public record SimulatedCapabilities(IList<AvailableResourceCapability> Capabilities)
 {
+    public static SimulatedCapabilities None()
+    {
+        return new SimulatedCapabilities(new List<AvailableResourceCapability>());
+    }
+
     public SimulatedCapabilities Add(IList<AvailableResourceCapability> newCapabilities)
     {
         var newAvailabilities = new List<AvailableResourceCapability>(Capabilities);

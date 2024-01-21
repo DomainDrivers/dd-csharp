@@ -54,5 +54,9 @@ public class ArchitectureDependencyTest
                 Types().That().AreNot(OptimizationLayer)
                     .And().AreNot(SharedLayer))
             .Check(Architecture);
+        Types().That().Are(SharedLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(SharedLayer))
+            .Check(Architecture);
     }
 }

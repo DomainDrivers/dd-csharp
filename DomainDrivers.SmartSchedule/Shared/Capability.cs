@@ -1,4 +1,4 @@
-namespace DomainDrivers.SmartSchedule.Simulation;
+namespace DomainDrivers.SmartSchedule.Shared;
 
 public record Capability(string Name, string Type)
 {
