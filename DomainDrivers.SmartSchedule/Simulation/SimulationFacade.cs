@@ -11,6 +11,18 @@ public class SimulationFacade
         _optimizationFacade = optimizationFacade;
     }
 
+    public double ProfitAfterBuyingNewCapability(IList<SimulatedProject> projectsSimulations,
+        SimulatedCapabilities capabilitiesWithoutNewOne, AdditionalPricedCapability newPricedCapability)
+    {
+        var capabilitiesWithNewResource =
+            capabilitiesWithoutNewOne.Add(newPricedCapability.AvailableResourceCapability);
+        var resultWithout = _optimizationFacade.Calculate(ToItems(projectsSimulations),
+            ToCapacity(capabilitiesWithoutNewOne), Comparer<Item>.Create((x, y) => y.Value.CompareTo(x.Value)));
+        var resultWith = _optimizationFacade.Calculate(ToItems(projectsSimulations),
+            ToCapacity(capabilitiesWithNewResource), Comparer<Item>.Create((x, y) => y.Value.CompareTo(x.Value)));
+        return resultWith.Profit - decimal.ToDouble(newPricedCapability.Value) - resultWithout.Profit;
+    }
+
     public Result WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
         IList<SimulatedProject> projectsSimulations, SimulatedCapabilities totalCapability)
     {

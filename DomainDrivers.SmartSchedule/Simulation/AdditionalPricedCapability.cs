@@ -1,0 +1,3 @@
+namespace DomainDrivers.SmartSchedule.Simulation;
+
+public record AdditionalPricedCapability(decimal Value, AvailableResourceCapability AvailableResourceCapability);

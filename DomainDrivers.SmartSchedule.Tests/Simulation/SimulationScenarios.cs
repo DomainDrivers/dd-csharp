@@ -149,6 +149,43 @@ public class SimulationScenarios
         Assert.Equal(Project1.ToString(), result.ChosenItems[0].Name);
     }
 
+    [Fact]
+    public void CheckIfItPaysOffToPayForCapability()
+    {
+        //given
+        var simulatedProjects = SimulatedProjects()
+            .WithProject(Project1)
+            .ThatRequires(DemandFor(Skill("JAVA-MID"), Jan1))
+            .ThatCanEarn(100)
+            .WithProject(Project2)
+            .ThatRequires(DemandFor(Skill("JAVA-MID"), Jan1))
+            .ThatCanEarn(40)
+            .Build();
+
+        //and there are
+        var simulatedAvailability = SimulatedCapabilities()
+            .WithEmployee(Staszek)
+            .ThatBrings(Skill("JAVA-MID"))
+            .ThatIsAvailableAt(Jan1)
+            .Build();
+
+        //and there are
+        var slawek = new AdditionalPricedCapability(9999,
+            new AvailableResourceCapability(Guid.NewGuid(), Skill("JAVA-MID"), Jan1));
+        var staszek = new AdditionalPricedCapability(3,
+            new AvailableResourceCapability(Guid.NewGuid(), Skill("JAVA-MID"), Jan1));
+
+        //when
+        var buyingSlawek =
+            _simulationFacade.ProfitAfterBuyingNewCapability(simulatedProjects, simulatedAvailability, slawek);
+        var buyingStaszek =
+            _simulationFacade.ProfitAfterBuyingNewCapability(simulatedProjects, simulatedAvailability, staszek);
+
+        //then
+        Assert.Equal(-9959d, buyingSlawek); //we pay 9999 and get the project for 40
+        Assert.Equal(37d, buyingStaszek); //we pay 3 and get the project for 40
+    }
+
     private static SimulatedProjectsBuilder SimulatedProjects()
     {
         return new SimulatedProjectsBuilder();
