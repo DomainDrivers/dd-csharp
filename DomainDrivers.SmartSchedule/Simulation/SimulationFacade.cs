@@ -1,86 +1,41 @@
+using DomainDrivers.SmartSchedule.Optimization;
+
 namespace DomainDrivers.SmartSchedule.Simulation;
 
 public class SimulationFacade
 {
+    private readonly OptimizationFacade _optimizationFacade;
+
+    public SimulationFacade(OptimizationFacade optimizationFacade)
+    {
+        _optimizationFacade = optimizationFacade;
+    }
+
     public Result WhichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
         IList<SimulatedProject> projectsSimulations, SimulatedCapabilities totalCapability)
     {
-        var list = totalCapability.Capabilities;
-        var capacitiesSize = list.Count;
-        var dp = new double[capacitiesSize + 1];
-        var chosenItemsList = new List<SimulatedProject>[capacitiesSize + 1];
-        var allocatedCapacitiesList = new List<ISet<AvailableResourceCapability>>(capacitiesSize + 1);
-
-        var automaticallyIncludedItems = projectsSimulations
-            .Where(project => project.AllDemandsSatisfied)
-            .ToList();
-        var guaranteedValue = automaticallyIncludedItems
-            .Sum(project => decimal.ToDouble(project.Earnings));
-
-        for (int i = 0; i <= capacitiesSize; i++)
-        {
-            chosenItemsList[i] = new List<SimulatedProject>();
-            allocatedCapacitiesList.Add(new HashSet<AvailableResourceCapability>());
-        }
-
-        var allAvailabilities = new List<AvailableResourceCapability>(list);
-        var itemToCapacitiesMap = new Dictionary<SimulatedProject, ISet<AvailableResourceCapability>>();
-
-        foreach (var project in projectsSimulations.OrderByDescending(project => project.Earnings))
-        {
-            var chosenCapacities =
-                MatchCapacities(project.MissingDemands, allAvailabilities);
-            allAvailabilities = allAvailabilities.Except(chosenCapacities).ToList();
-
-            if (chosenCapacities.Count == 0)
-            {
-                continue;
-            }
-
-            var sumValue = decimal.ToDouble(project.Earnings);
-            var chosenCapacitiesCount = chosenCapacities.Count;
-
-            for (int j = capacitiesSize; j >= chosenCapacitiesCount; j--)
-            {
-                if (dp[j] < sumValue + dp[j - chosenCapacitiesCount])
-                {
-                    dp[j] = sumValue + dp[j - chosenCapacitiesCount];
-
-                    chosenItemsList[j] = new List<SimulatedProject>(chosenItemsList[j - chosenCapacitiesCount])
-                    {
-                        project
-                    };
-
-                    allocatedCapacitiesList[j].UnionWith(chosenCapacities);
-                }
-            }
-
-            itemToCapacitiesMap[project] = new HashSet<AvailableResourceCapability>(chosenCapacities);
-        }
-
-        chosenItemsList[capacitiesSize].AddRange(automaticallyIncludedItems);
-        return new Result(dp[capacitiesSize] + guaranteedValue, chosenItemsList[capacitiesSize], itemToCapacitiesMap);
+        return _optimizationFacade.Calculate(ToItems(projectsSimulations), ToCapacity(totalCapability));
     }
 
-    private IList<AvailableResourceCapability> MatchCapacities(Demands demands,
-        IList<AvailableResourceCapability> availableCapacities)
+    private TotalCapacity ToCapacity(SimulatedCapabilities simulatedCapabilities)
     {
-        var result = new List<AvailableResourceCapability>();
-        foreach (var singleDemand in demands.All)
-        {
-            var matchingCapacity = availableCapacities
-                .FirstOrDefault(capability => singleDemand.IsSatisfiedBy(capability));
+        var capabilities = simulatedCapabilities.Capabilities;
+        var capacityDimensions = new List<ICapacityDimension>(capabilities);
+        return new TotalCapacity(capacityDimensions);
+    }
 
-            if (matchingCapacity != null)
-            {
-                result.Add(matchingCapacity);
-            }
-            else
-            {
-                return new List<AvailableResourceCapability>();
-            }
-        }
+    private IList<Item> ToItems(IList<SimulatedProject> projectsSimulations)
+    {
+        return projectsSimulations
+            .Select(project => ToItem(project))
+            .ToList();
+    }
 
-        return result;
+    private Item ToItem(SimulatedProject simulatedProject)
+    {
+        var missingDemands = simulatedProject.MissingDemands.All;
+        IList<IWeightDimension> weights = new List<IWeightDimension>(missingDemands);
+        return new Item(simulatedProject.ProjectId.ToString(),
+            decimal.ToDouble(simulatedProject.Earnings), new TotalWeight(weights));
     }
 }

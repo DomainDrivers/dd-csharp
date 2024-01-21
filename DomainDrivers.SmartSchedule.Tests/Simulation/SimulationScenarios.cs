@@ -1,3 +1,5 @@
+using DomainDrivers.SmartSchedule.Optimization;
+using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
 using static DomainDrivers.SmartSchedule.Simulation.Demand;
 using static DomainDrivers.SmartSchedule.Simulation.Capability;
@@ -13,7 +15,7 @@ public class SimulationScenarios
     private static readonly Guid Staszek = Guid.NewGuid();
     private static readonly Guid Leon = Guid.NewGuid();
 
-    private readonly SimulationFacade _simulationFacade = new SimulationFacade();
+    private readonly SimulationFacade _simulationFacade = new SimulationFacade(new OptimizationFacade());
 
     [Fact]
     public void PicksOptimalProjectBasedOnEarnings()
@@ -48,7 +50,7 @@ public class SimulationScenarios
 
         //then
         Assert.Equal(108d, result.Profit);
-        Assert.Equal(2, result.ChosenProjects.Count);
+        Assert.Equal(2, result.ChosenItems.Count);
     }
 
     [Fact]
@@ -78,7 +80,7 @@ public class SimulationScenarios
 
         //then
         Assert.Equal(99d, result.Profit);
-        Assert.Equal(1, result.ChosenProjects.Count);
+        Assert.Equal(1, result.ChosenItems.Count);
     }
 
     [Fact]

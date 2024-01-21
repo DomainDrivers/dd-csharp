@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
 
 namespace DomainDrivers.SmartSchedule.Tests.Simulation;
