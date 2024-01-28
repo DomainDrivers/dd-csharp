@@ -2,9 +2,9 @@
 
 namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
-public static class StagesToNodes
+public class StagesToNodes
 {
-    public static Nodes<Stage> Calculate(IList<Stage> stages)
+    public Nodes<Stage> Calculate(IList<Stage> stages)
     {
         IDictionary<string, Node<Stage>> result = stages.ToDictionary(stage => stage.Name, stage => new Node<Stage>(stage.Name, stage));
 
@@ -18,7 +18,7 @@ public static class StagesToNodes
         return new Nodes<Stage>(new HashSet<Node<Stage>>(result.Values));
     }
 
-    private static IDictionary<string, Node<Stage>> SharedResources(Stage stage, IList<Stage> with, IDictionary<string, Node<Stage>> result)
+    private IDictionary<string, Node<Stage>> SharedResources(Stage stage, IList<Stage> with, IDictionary<string, Node<Stage>> result)
     {
         foreach (var other in with)
         {
@@ -44,7 +44,7 @@ public static class StagesToNodes
         return result;
     }
 
-    private static IDictionary<string, Node<Stage>> ExplicitDependencies(Stage stage, IDictionary<string, Node<Stage>> result)
+    private IDictionary<string, Node<Stage>> ExplicitDependencies(Stage stage, IDictionary<string, Node<Stage>> result)
     {
         var nodeWithExplicitDeps = result[stage.Name];
         foreach (var explicitDependency in stage.Dependencies)

@@ -1,21 +1,13 @@
 ﻿namespace DomainDrivers.SmartSchedule.Sorter;
 
-public static class GraphTopologicalSort<T>
+public class GraphTopologicalSort<T>
 {
-    private static readonly Func<Nodes<T>, SortedNodes<T>, SortedNodes<T>> CreateSortedNodesRecursively =
-        (remainingNodes, accumulatedNodes) =>
-            IntermediateSortedNodesCreator<T>.CreateSortedNodesRecursively(remainingNodes, accumulatedNodes);
-
-    public static SortedNodes<T> Sort(Nodes<T> nodes)
+    public SortedNodes<T> Sort(Nodes<T> nodes)
     {
-        return CreateSortedNodesRecursively.Invoke(nodes, SortedNodes<T>.Empty());
+        return CreateSortedNodesRecursively(nodes, SortedNodes<T>.Empty());
     }
-}
 
-public static class IntermediateSortedNodesCreator<T>
-{
-    public static SortedNodes<T> CreateSortedNodesRecursively(Nodes<T> remainingNodes,
-        SortedNodes<T> accumulatedSortedNodes)
+    private SortedNodes<T> CreateSortedNodesRecursively(Nodes<T> remainingNodes, SortedNodes<T> accumulatedSortedNodes)
     {
         var alreadyProcessedNodes = accumulatedSortedNodes.All
             .SelectMany(n => n.All)
