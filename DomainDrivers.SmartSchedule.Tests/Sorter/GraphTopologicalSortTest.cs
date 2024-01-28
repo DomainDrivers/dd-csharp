@@ -4,8 +4,6 @@ namespace DomainDrivers.SmartSchedule.Tests.Sorter;
 
 public class GraphTopologicalSortTest
 {
-    private static readonly GraphTopologicalSort<string> GraphTopologicalSort = new GraphTopologicalSort<string>();
-
     [Fact]
     public void TestTopologicalSortWithSimpleDependencies()
     {
@@ -21,7 +19,7 @@ public class GraphTopologicalSortTest
         var nodes = new Nodes<string>(node1, node2, node3, node4);
 
         //when
-        var sortedNodes = GraphTopologicalSort.Sort(nodes);
+        var sortedNodes = GraphTopologicalSort<string>.Sort(nodes);
 
         //then
         Assert.Equal(3, sortedNodes.All.Count);
@@ -54,7 +52,7 @@ public class GraphTopologicalSortTest
         var nodes = new Nodes<string>(node1, node2, node3, node4, node5);
 
         //when
-        var sortedNodes = GraphTopologicalSort.Sort(nodes);
+        var sortedNodes = GraphTopologicalSort<string>.Sort(nodes);
 
         //then
         Assert.Equal(5, sortedNodes.All.Count);
@@ -84,7 +82,7 @@ public class GraphTopologicalSortTest
         var nodes = new Nodes<string>(node1, node2);
 
         //when
-        var sortedNodes = GraphTopologicalSort.Sort(nodes);
+        var sortedNodes = GraphTopologicalSort<string>.Sort(nodes);
 
         //then
         Assert.Equal(1, sortedNodes.All.Count);
@@ -101,7 +99,7 @@ public class GraphTopologicalSortTest
         var nodes = new Nodes<string>(node1, node2);
 
         //when
-        var sortedNodes = GraphTopologicalSort.Sort(nodes);
+        var sortedNodes = GraphTopologicalSort<string>.Sort(nodes);
 
         //then
         Assert.Empty(sortedNodes.All);

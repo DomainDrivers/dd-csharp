@@ -2,9 +2,9 @@
 
 namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
-public class SortedNodesToParallelizedStages
+public static class SortedNodesToParallelizedStages
 {
-    public ParallelStagesList Calculate(SortedNodes<Stage> sortedNodes)
+    public static ParallelStagesList Calculate(SortedNodes<Stage> sortedNodes)
     {
         var parallelized = sortedNodes.All
             .Select(nodes => new ParallelStages(nodes.NodesCollection
