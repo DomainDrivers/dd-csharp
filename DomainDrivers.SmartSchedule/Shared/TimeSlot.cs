@@ -2,6 +2,11 @@ namespace DomainDrivers.SmartSchedule.Shared;
 
 public record TimeSlot(DateTime From, DateTime To)
 {
+    public static TimeSlot Empty()
+    {
+        return new TimeSlot(DateTime.UnixEpoch, DateTime.UnixEpoch);
+    }
+
     public static TimeSlot CreateDailyTimeSlotAtUtc(int year, int month, int day)
     {
         var thisDay = new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
@@ -65,5 +70,32 @@ public record TimeSlot(DateTime From, DateTime To)
         }
 
         return result;
+    }
+
+    public TimeSlot CommonPartWith(TimeSlot other)
+    {
+        if (!OverlapsWith(other))
+        {
+            return Empty();
+        }
+
+        var commonStart = From > other.From ? From : other.From;
+        var commonEnd = To < other.To ? To : other.To;
+        return new TimeSlot(commonStart, commonEnd);
+    }
+
+    public bool IsEmpty
+    {
+        get { return From == To; }
+    }
+
+    public TimeSpan Duration
+    {
+        get { return To - From; }
+    }
+
+    public TimeSlot Stretch(TimeSpan duration)
+    {
+        return new TimeSlot(From - duration, To + duration);
     }
 }

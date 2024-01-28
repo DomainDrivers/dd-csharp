@@ -9,6 +9,11 @@ public record ParallelStagesList(IList<ParallelStages> All)
         return new ParallelStagesList(new List<ParallelStages>());
     }
 
+    public static ParallelStagesList Of(params ParallelStages[] stages)
+    {
+        return new ParallelStagesList(stages.ToList());
+    }
+
     public string Print()
     {
         return string.Join(" | ", All.Select(parallelStages => parallelStages.Print()));
@@ -18,6 +23,13 @@ public record ParallelStagesList(IList<ParallelStages> All)
     {
         var result = new List<ParallelStages>(All) { newParallelStages };
         return new ParallelStagesList(result);
+    }
+
+    public IList<ParallelStages> AllSorted(IComparer<ParallelStages> comparing)
+    {
+        return All
+            .Order(comparing)
+            .ToList();
     }
 
     public virtual bool Equals(ParallelStagesList? other)

@@ -21,13 +21,18 @@ public static class CollectionExtensions
             .Aggregate(0, (hash, pair) => HashCode.Combine(hash, pair.GetHashCode()));
     }
 
-    // Based on: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html#hashCode()
     public static int CalculateHashCode<TKey, TValue>(this IDictionary<TKey, TValue> collection)
+    {
+        return CalculateHashCode(collection, value => value == null ? 0 : value.GetHashCode());
+    }
+    
+    // Based on: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html#hashCode()
+    public static int CalculateHashCode<TKey, TValue>(this IDictionary<TKey, TValue> collection, Func<TValue, int> getHashCode)
     {
         var sum = 0;
         foreach (var element in collection)
         {
-            sum = unchecked(sum + (element.Value == null ? 0 : element.Value.GetHashCode()));
+            sum = unchecked(sum + (element.Value == null ? 0 : getHashCode(element.Value)));
         }
 
         return sum;
