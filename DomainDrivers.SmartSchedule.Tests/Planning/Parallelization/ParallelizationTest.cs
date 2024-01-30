@@ -1,4 +1,5 @@
 ﻿using DomainDrivers.SmartSchedule.Planning.Parallelization;
+using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning.Parallelization;
 

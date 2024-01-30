@@ -14,6 +14,9 @@ public class ArchitectureDependencyTest
         Assembly.Load("DomainDrivers.SmartSchedule")
     ).Build();
 
+    private static readonly IObjectProvider<IType> AvailabilityLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Availability").As("Availability");
+
     private static readonly IObjectProvider<IType> SorterLayer =
         Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Sorter").As("Sorter");
 
@@ -32,6 +35,11 @@ public class ArchitectureDependencyTest
     [Fact]
     public void CheckDependencies()
     {
+        Types().That().Are(AvailabilityLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(AvailabilityLayer)
+                    .And().AreNot(SharedLayer))
+            .Check(Architecture);
         Types().That().Are(ParallelizationLayer)
             .Should().NotDependOnAny(
                 Types().That().AreNot(ParallelizationLayer)

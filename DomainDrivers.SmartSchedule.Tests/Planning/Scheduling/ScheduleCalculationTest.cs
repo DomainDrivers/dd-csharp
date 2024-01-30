@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
 using DomainDrivers.SmartSchedule.Shared;

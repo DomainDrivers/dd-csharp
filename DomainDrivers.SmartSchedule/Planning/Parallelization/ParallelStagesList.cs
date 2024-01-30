@@ -4,11 +4,6 @@ namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
 public record ParallelStagesList(IList<ParallelStages> All)
 {
-    public static ParallelStagesList Empty()
-    {
-        return new ParallelStagesList(new List<ParallelStages>());
-    }
-
     public static ParallelStagesList Of(params ParallelStages[] stages)
     {
         return new ParallelStagesList(stages.ToList());
@@ -30,6 +25,11 @@ public record ParallelStagesList(IList<ParallelStages> All)
         return All
             .Order(comparing)
             .ToList();
+    }
+
+    public IList<ParallelStages> AllSorted()
+    {
+        return AllSorted(Comparer<ParallelStages>.Create((x, y) => x.Print().CompareTo(y.Print())));
     }
 
     public virtual bool Equals(ParallelStagesList? other)

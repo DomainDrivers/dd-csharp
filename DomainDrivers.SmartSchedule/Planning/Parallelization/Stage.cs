@@ -1,4 +1,6 @@
-﻿namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
+﻿using DomainDrivers.SmartSchedule.Shared;
+
+namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
 public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceName> Resources, TimeSpan Duration)
 {
