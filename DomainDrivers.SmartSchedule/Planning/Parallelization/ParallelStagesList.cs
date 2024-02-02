@@ -4,6 +4,11 @@ namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
 public record ParallelStagesList(IList<ParallelStages> All)
 {
+    public static ParallelStagesList Empty()
+    {
+        return new ParallelStagesList(new List<ParallelStages>());
+    }
+    
     public static ParallelStagesList Of(params ParallelStages[] stages)
     {
         return new ParallelStagesList(stages.ToList());

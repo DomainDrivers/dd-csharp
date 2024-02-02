@@ -54,7 +54,7 @@ public class ParallelizationTest
         stage1 = stage1.DependsOn(stage2); // making it cyclic
 
         //when
-        var sortedStages = StageParallelization.Of(new HashSet<Stage> { stage1, stage2 });
+        var sortedStages = StageParallelization.Of(new SortedSet<Stage>(Comparer<Stage>.Create((x, y) => x.Name.CompareTo(y.Name))) { stage1, stage2 });
 
         //then
         Assert.Empty(sortedStages.All);

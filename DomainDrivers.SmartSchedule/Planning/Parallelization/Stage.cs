@@ -35,11 +35,17 @@ public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceNam
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return StageName == other.StageName;
+        return StageName == other.StageName
+               && Dependencies.SetEquals(other.Dependencies)
+               && Resources.SetEquals(other.Resources)
+               && Duration == other.Duration;
     }
-
+    
     public override int GetHashCode()
     {
-        return StageName.GetHashCode();
+        return HashCode.Combine(StageName,
+            Dependencies.CalculateHashCode(),
+            Resources.CalculateHashCode(),
+            Duration);
     }
 }

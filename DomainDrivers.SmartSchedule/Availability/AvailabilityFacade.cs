@@ -4,6 +4,6 @@ public class AvailabilityFacade
 {
     public Calendars AvailabilitiesOfResources()
     {
-        return null!;
+        return Calendars.Of();
     }
 }
