@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DomainDrivers.SmartSchedule;
+using DomainDrivers.SmartSchedule.Allocation;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Shared;
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<SmartScheduleDbContext>(options => { options.UseNp
 builder.Services.AddShared();
 builder.Services.AddPlanning();
 builder.Services.AddAvailability();
+builder.Services.AddAllocation();
 
 var app = builder.Build();
 

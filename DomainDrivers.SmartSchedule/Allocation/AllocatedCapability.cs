@@ -1,7 +1,9 @@
+using System.Text.Json.Serialization;
 using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
 
+[method: JsonConstructor]
 public record AllocatedCapability(Guid AllocatedCapabilityId, Guid ResourceId, Capability Capability, TimeSlot TimeSlot)
 {
     public AllocatedCapability(Guid resourceId, Capability capability, TimeSlot forSlot) : this(Guid.NewGuid(),

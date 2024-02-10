@@ -5,20 +5,22 @@ namespace DomainDrivers.SmartSchedule.Allocation;
 
 public class ProjectAllocations
 {
-    private ProjectAllocationsId _projectId;
-    private Demands _demands;
-    private TimeSlot? _timeSlot;
+    public ProjectAllocationsId ProjectId { get; private set; }
+
+    public Allocations Allocations { get; private set; }
+
+    public Demands Demands { get; private set; }
+
+    public TimeSlot? TimeSlot { get; private set; }
 
     public ProjectAllocations(ProjectAllocationsId projectId, Allocations allocations, Demands scheduledDemands,
         TimeSlot timeSlot)
     {
-        _projectId = projectId;
+        ProjectId = projectId;
         Allocations = allocations;
-        _demands = scheduledDemands;
-        _timeSlot = timeSlot;
+        Demands = scheduledDemands;
+        TimeSlot = timeSlot;
     }
-
-    public Allocations Allocations { get; private set; }
 
     public static ProjectAllocations Empty(ProjectAllocationsId projectId)
     {
@@ -32,9 +34,9 @@ public class ProjectAllocations
 
     private ProjectAllocations(ProjectAllocationsId projectId, Allocations allocations, Demands demands)
     {
-        _projectId = projectId;
+        ProjectId = projectId;
         Allocations = allocations;
-        _demands = demands;
+        Demands = demands;
     }
 
     public CapabilitiesAllocated? Allocate(ResourceId resourceId, Capability capability,
@@ -48,7 +50,7 @@ public class ProjectAllocations
         }
 
         Allocations = newAllocations;
-        return new CapabilitiesAllocated(allocatedCapability.AllocatedCapabilityId, _projectId, MissingDemands(),
+        return new CapabilitiesAllocated(allocatedCapability.AllocatedCapabilityId, ProjectId, MissingDemands(),
             when);
     }
 
@@ -64,7 +66,7 @@ public class ProjectAllocations
             return true;
         }
 
-        return requestedSlot.Within(_timeSlot);
+        return requestedSlot.Within(TimeSlot);
     }
 
     public CapabilityReleased? Release(Guid allocatedCapabilityId, TimeSlot timeSlot, DateTime when)
@@ -77,29 +79,29 @@ public class ProjectAllocations
 
         Allocations = newAllocations;
 
-        return new CapabilityReleased(_projectId, MissingDemands(), when);
+        return new CapabilityReleased(ProjectId, MissingDemands(), when);
     }
 
     public Demands MissingDemands()
     {
-        return _demands.MissingDemands(Allocations);
+        return Demands.MissingDemands(Allocations);
     }
 
-    [MemberNotNullWhen(true, nameof(_timeSlot))]
+    [MemberNotNullWhen(true, nameof(TimeSlot))]
     public bool HasTimeSlot
     {
-        get { return _timeSlot != null && _timeSlot != TimeSlot.Empty(); }
+        get { return TimeSlot != null && TimeSlot != TimeSlot.Empty(); }
     }
 
     public ProjectAllocationScheduled? DefineSlot(TimeSlot timeSlot, DateTime when)
     {
-        _timeSlot = timeSlot;
-        return new ProjectAllocationScheduled(_projectId, timeSlot, when);
+        TimeSlot = timeSlot;
+        return new ProjectAllocationScheduled(ProjectId, timeSlot, when);
     }
 
     public ProjectAllocationsDemandsScheduled? AddDemands(Demands newDemands, DateTime when)
     {
-        _demands = _demands.WithNew(newDemands);
-        return new ProjectAllocationsDemandsScheduled(_projectId, MissingDemands(), when);
+        Demands = Demands.WithNew(newDemands);
+        return new ProjectAllocationsDemandsScheduled(ProjectId, MissingDemands(), when);
     }
 }

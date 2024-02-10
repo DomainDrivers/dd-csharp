@@ -16,4 +16,9 @@ public record Capability(string Name, string Type)
     {
         return new Capability(asset, "ASSET");
     }
+
+    public static IList<Capability> Skills(params string[] skills)
+    {
+        return skills.Select(x => Capability.Skill(x)).ToList();
+    }
 }
