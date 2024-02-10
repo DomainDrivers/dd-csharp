@@ -2,6 +2,7 @@ using System.Text.Json;
 using DomainDrivers.SmartSchedule;
 using DomainDrivers.SmartSchedule.Allocation;
 using DomainDrivers.SmartSchedule.Availability;
+using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ builder.Services.AddShared();
 builder.Services.AddPlanning();
 builder.Services.AddAvailability();
 builder.Services.AddAllocation();
+builder.Services.AddCashFlow();
 
 var app = builder.Build();
 

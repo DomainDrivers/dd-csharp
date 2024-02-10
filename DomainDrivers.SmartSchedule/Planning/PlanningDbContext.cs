@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DomainDrivers.SmartSchedule.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Planning;
 

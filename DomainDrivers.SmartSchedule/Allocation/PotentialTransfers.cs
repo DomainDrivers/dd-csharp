@@ -1,11 +1,12 @@
-﻿using DomainDrivers.SmartSchedule.Shared;
+﻿using DomainDrivers.SmartSchedule.Allocation.Cashflow;
+using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
 
 public record PotentialTransfers(
     ProjectsAllocationsSummary Summary,
-    IDictionary<ProjectAllocationsId, decimal> Earnings)
+    IDictionary<ProjectAllocationsId, Earnings> Earnings)
 {
     public PotentialTransfers Transfer(ProjectAllocationsId projectFrom, ProjectAllocationsId projectTo,
         AllocatedCapability capability, TimeSlot forSlot)
@@ -33,7 +34,7 @@ public record PotentialTransfers(
     public IList<SimulatedProject> ToSimulatedProjects()
     {
         return Summary.ProjectAllocations.Keys.Select(project =>
-                new SimulatedProject(ProjectId.From(project.Id), () => Earnings[project], GetMissingDemands(project)))
+                new SimulatedProject(ProjectId.From(project.Id), () => Earnings[project].Value, GetMissingDemands(project)))
             .ToList();
     }
 

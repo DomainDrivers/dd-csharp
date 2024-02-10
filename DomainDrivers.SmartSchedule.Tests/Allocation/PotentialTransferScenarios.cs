@@ -1,4 +1,5 @@
 using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Optimization;
 using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
@@ -35,8 +36,8 @@ public class PotentialTransferScenarios
     public void SimulatesMovingCapabilitiesToDifferentProject()
     {
         //given
-        var bankingSoft = new Project(BankingSoftId, DemandForJavaMidInJan, 9);
-        var insuranceSoft = new Project(InsuranceSoftId, DemandForJavaMidInJan, 90);
+        var bankingSoft = new Project(BankingSoftId, DemandForJavaMidInJan, Earnings.Of(9));
+        var insuranceSoft = new Project(InsuranceSoftId, DemandForJavaMidInJan, Earnings.Of(90));
         bankingSoft.Add(StaszekJavaMid);
         var projects = ToPotentialTransfers(bankingSoft, insuranceSoft);
 
@@ -52,8 +53,8 @@ public class PotentialTransferScenarios
     public void SimulatesMovingCapabilitiesToDifferentProjectJustForAWhile()
     {
         //given
-        var bankingSoft = new Project(BankingSoftId, DemandForJavaMidInJan, 9);
-        var insuranceSoft = new Project(InsuranceSoftId, DemandForJavaJustFor15MinInJan, 99);
+        var bankingSoft = new Project(BankingSoftId, DemandForJavaMidInJan, Earnings.Of(9));
+        var insuranceSoft = new Project(InsuranceSoftId, DemandForJavaJustFor15MinInJan, Earnings.Of(99));
         bankingSoft.Add(StaszekJavaMid);
         var projects = ToPotentialTransfers(bankingSoft, insuranceSoft);
 
@@ -70,8 +71,8 @@ public class PotentialTransferScenarios
     public void TheMoveGivesZeroProfitWhenThereAreStillMissingDemands()
     {
         //given
-        var bankingSoft = new Project(BankingSoftId, DemandForJavaMidInJan, 9);
-        var insuranceSoft = new Project(InsuranceSoftId, DemandsForJavaAndPythonInJan, 99);
+        var bankingSoft = new Project(BankingSoftId, DemandForJavaMidInJan, Earnings.Of(9));
+        var insuranceSoft = new Project(InsuranceSoftId, DemandsForJavaAndPythonInJan, Earnings.Of(99));
         bankingSoft.Add(StaszekJavaMid);
         var projects = ToPotentialTransfers(bankingSoft, insuranceSoft);
 
@@ -87,7 +88,7 @@ public class PotentialTransferScenarios
     {
         var allocations = new Dictionary<ProjectAllocationsId, Allocations>();
         var demands = new Dictionary<ProjectAllocationsId, Demands>();
-        var earnings = new Dictionary<ProjectAllocationsId, decimal>();
+        var earnings = new Dictionary<ProjectAllocationsId, Earnings>();
         foreach (var project in projects)
         {
             allocations[project.Id] = project.Allocations;
@@ -99,15 +100,15 @@ public class PotentialTransferScenarios
             new ProjectsAllocationsSummary(new Dictionary<ProjectAllocationsId, TimeSlot>(), allocations, demands),
             earnings);
     }
-
+    
     private class Project
     {
         public ProjectAllocationsId Id { get; }
-        public decimal Earnings { get; }
+        public Earnings Earnings { get; }
         public Demands Demands { get; }
         public Allocations Allocations { get; private set; }
 
-        public Project(ProjectAllocationsId id, Demands demands, decimal earnings)
+        public Project(ProjectAllocationsId id, Demands demands, Earnings earnings)
         {
             Id = id;
             Demands = demands;
