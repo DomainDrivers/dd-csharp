@@ -1,4 +1,5 @@
-﻿using DomainDrivers.SmartSchedule.Shared;
+using System.Diagnostics.CodeAnalysis;
+using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
 
@@ -39,37 +40,44 @@ public class ProjectAllocations
     public CapabilitiesAllocated? Allocate(ResourceId resourceId, Capability capability,
         TimeSlot requestedSlot, DateTime when)
     {
-        if (NothingAllocated() || !WithinProjectTimeSlot(requestedSlot))
+        var allocatedCapability = new AllocatedCapability(resourceId.Id, capability, requestedSlot);
+        var newAllocations = Allocations.Add(allocatedCapability);
+        if (NothingAllocated(newAllocations) || !WithinProjectTimeSlot(requestedSlot))
         {
             return null;
         }
 
-        return new CapabilitiesAllocated(null, null, null, null);
+        Allocations = newAllocations;
+        return new CapabilitiesAllocated(allocatedCapability.AllocatedCapabilityId, _projectId, MissingDemands(),
+            when);
     }
 
-    private bool NothingAllocated()
+    private bool NothingAllocated(Allocations newAllocations)
     {
-        return false;
+        return newAllocations == Allocations;
     }
 
     private bool WithinProjectTimeSlot(TimeSlot requestedSlot)
     {
-        return false;
+        if (!HasTimeSlot)
+        {
+            return true;
+        }
+
+        return requestedSlot.Within(_timeSlot);
     }
 
     public CapabilityReleased? Release(Guid allocatedCapabilityId, TimeSlot timeSlot, DateTime when)
     {
-        if (NothingReleased())
+        var newAllocations = Allocations.Remove(allocatedCapabilityId, timeSlot);
+        if (newAllocations == Allocations)
         {
             return null;
         }
 
-        return new CapabilityReleased(null, null, null);
-    }
+        Allocations = newAllocations;
 
-    private bool NothingReleased()
-    {
-        return false;
+        return new CapabilityReleased(_projectId, MissingDemands(), when);
     }
 
     public Demands MissingDemands()
@@ -77,8 +85,21 @@ public class ProjectAllocations
         return _demands.MissingDemands(Allocations);
     }
 
+    [MemberNotNullWhen(true, nameof(_timeSlot))]
     public bool HasTimeSlot
     {
         get { return _timeSlot != null && _timeSlot != TimeSlot.Empty(); }
+    }
+
+    public ProjectAllocationScheduled? DefineSlot(TimeSlot timeSlot, DateTime when)
+    {
+        _timeSlot = timeSlot;
+        return new ProjectAllocationScheduled(_projectId, timeSlot, when);
+    }
+
+    public ProjectAllocationsDemandsScheduled? AddDemands(Demands newDemands, DateTime when)
+    {
+        _demands = _demands.WithNew(newDemands);
+        return new ProjectAllocationsDemandsScheduled(_projectId, MissingDemands(), when);
     }
 }

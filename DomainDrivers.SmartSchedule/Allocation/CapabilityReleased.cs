@@ -2,11 +2,11 @@
 
 public record CapabilityReleased(
     Guid EventId,
-    ProjectAllocationsId? ProjectId,
-    Demands? MissingDemands,
-    DateTime? OccurredAt)
+    ProjectAllocationsId ProjectId,
+    Demands MissingDemands,
+    DateTime OccurredAt)
 {
-    public CapabilityReleased(ProjectAllocationsId? projectId, Demands? missingDemands, DateTime? occurredAt)
+    public CapabilityReleased(ProjectAllocationsId projectId, Demands missingDemands, DateTime occurredAt)
         : this(Guid.NewGuid(), projectId, missingDemands, occurredAt)
     {
     }

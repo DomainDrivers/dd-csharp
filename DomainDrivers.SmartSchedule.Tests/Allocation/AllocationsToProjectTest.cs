@@ -12,7 +12,8 @@ public class AllocationsToProjectTest
     static readonly ResourceId AdminId = ResourceId.NewOne();
     static readonly TimeSlot Feb1 = TimeSlot.CreateDailyTimeSlotAtUtc(2020, 2, 1);
     static readonly TimeSlot Feb2 = TimeSlot.CreateDailyTimeSlotAtUtc(2020, 2, 2);
-    static readonly TimeSlot January = TimeSlot.CreateDailyTimeSlotAtUtc(2020, 1, 1);
+    static readonly TimeSlot January = TimeSlot.CreateMonthlyTimeSlotAtUtc(2020, 1);
+    static readonly TimeSlot February = TimeSlot.CreateMonthlyTimeSlotAtUtc(2020, 2);
 
     [Fact]
     public void CanAllocate()
@@ -103,7 +104,7 @@ public class AllocationsToProjectTest
         //and
         var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId!.Value, Feb1, When);
+        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, Feb1, When);
 
         //then
         Assert.NotNull(@event);
@@ -134,7 +135,7 @@ public class AllocationsToProjectTest
         var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
         allocations.Allocate(AdminId, Capability.Skill("JAVA"), Feb1, When);
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId!.Value, Feb1, When);
+        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, Feb1, When);
 
         //then
         Assert.NotNull(@event);
@@ -150,7 +151,7 @@ public class AllocationsToProjectTest
         var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
 
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId!.Value, Feb2, When);
+        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, Feb2, When);
 
         //then
         Assert.Null(@event);
@@ -170,7 +171,7 @@ public class AllocationsToProjectTest
         var theRest = new TimeSlot(Feb1.From.AddHours(2), Feb1.To);
 
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId!.Value, fifteenMinutesIn1Feb, When);
+        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, fifteenMinutesIn1Feb, When);
 
         //then
         Assert.Equal(new CapabilityReleased(@event!.EventId, ProjectId, Demands.None(), When), @event);
@@ -179,5 +180,39 @@ public class AllocationsToProjectTest
             new AllocatedCapability(AdminId.Id, Permission("ADMIN"), oneHourBefore),
             new AllocatedCapability(AdminId.Id, Permission("ADMIN"), theRest)
         }, allocations.Allocations.All);
+    }
+
+    [Fact]
+    public void CanChangeDemands()
+    {
+        //given
+        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Capability.Skill("JAVA"), Feb1));
+        //and
+        var allocations = ProjectAllocations.WithDemands(ProjectId, demands);
+        //and
+        allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        //when
+        var @event = allocations.AddDemands(Demands.Of(new Demand(Capability.Skill("PYTHON"), Feb1)), When);
+        //then
+        Assert.Equal(Demands.AllInSameTimeSlot(Feb1, Capability.Skill("JAVA"), Capability.Skill("PYTHON")),
+            allocations.MissingDemands());
+        Assert.Equal(new ProjectAllocationsDemandsScheduled(@event!.Uuid, ProjectId, Demands.AllInSameTimeSlot(
+            Feb1, Capability.Skill("JAVA"),
+            Capability.Skill("PYTHON")), When), @event);
+    }
+
+    [Fact]
+    public void CanChangeProjectDates()
+    {
+        //given
+        var allocations =
+            new ProjectAllocations(ProjectId, Allocations.None(), Demands.None(), January);
+
+        //when
+        var @event = allocations.DefineSlot(February, When);
+
+        //then
+        Assert.NotNull(@event);
+        Assert.Equal(new ProjectAllocationScheduled(@event.Uuid, ProjectId, February, When), @event);
     }
 }
