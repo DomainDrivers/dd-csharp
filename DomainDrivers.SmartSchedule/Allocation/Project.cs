@@ -27,14 +27,14 @@ public class Project
 
     public AllocatedCapability? Remove(AllocatedCapability capability, TimeSlot forSlot)
     {
-        var toRemove = _allocations.Find(capability, forSlot);
+        var toRemove = _allocations.Find(capability.AllocatedCapabilityId);
 
         if (toRemove == null)
         {
             return null;
         }
 
-        _allocations = _allocations.Remove(capability, forSlot);
+        _allocations = _allocations.Remove(capability.AllocatedCapabilityId, forSlot);
         return toRemove;
     }
 

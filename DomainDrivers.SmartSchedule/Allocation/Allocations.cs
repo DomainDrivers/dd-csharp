@@ -15,9 +15,9 @@ public record Allocations(ISet<AllocatedCapability> All)
         return new Allocations(all);
     }
 
-    public Allocations Remove(AllocatedCapability toRemove, TimeSlot slot)
+    public Allocations Remove(Guid toRemove, TimeSlot slot)
     {
-        var allocatedCapability = Find(toRemove, slot);
+        var allocatedCapability = Find(toRemove);
 
         if (allocatedCapability == null)
         {
@@ -40,9 +40,9 @@ public record Allocations(ISet<AllocatedCapability> All)
         return new Allocations(newSlots);
     }
 
-    public AllocatedCapability? Find(AllocatedCapability capability, TimeSlot timeSlot)
+    public AllocatedCapability? Find(Guid allocatedCapabilityId)
     {
-        return All.FirstOrDefault(ar => ar == capability);
+        return All.FirstOrDefault(ar => ar.AllocatedCapabilityId == allocatedCapabilityId);
     }
 
     public virtual bool Equals(Allocations? other)
