@@ -15,7 +15,7 @@ public class ArchitectureDependencyTest
     ).Build();
 
     private static readonly IObjectProvider<IType> AvailabilityLayer =
-        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Availability").As("Availability");
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Availability*", true).As("Availability");
 
     private static readonly IObjectProvider<IType> SorterLayer =
         Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Sorter").As("Sorter");

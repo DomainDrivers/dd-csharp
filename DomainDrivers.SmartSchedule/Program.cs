@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using DomainDrivers.SmartSchedule;
 using DomainDrivers.SmartSchedule.Allocation;
@@ -15,6 +16,7 @@ var dataSource = new NpgsqlDataSourceBuilder(connectionString)
     .EnableDynamicJson()
     .Build();
 builder.Services.AddDbContext<SmartScheduleDbContext>(options => { options.UseNpgsql(dataSource); });
+builder.Services.AddScoped<IDbConnection>(sp => sp.GetRequiredService<SmartScheduleDbContext>().Database.GetDbConnection());
 builder.Services.AddShared();
 builder.Services.AddPlanning();
 builder.Services.AddAvailability();

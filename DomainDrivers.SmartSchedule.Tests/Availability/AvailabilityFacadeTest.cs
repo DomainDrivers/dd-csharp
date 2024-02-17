@@ -3,13 +3,13 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
-public class AvailabilityFacadeTest
+public class AvailabilityFacadeTest : IntegrationTest
 {
     private readonly AvailabilityFacade _availabilityFacade;
 
-    public AvailabilityFacadeTest()
+    public AvailabilityFacadeTest(IntegrationTestApp testApp) : base(testApp)
     {
-        _availabilityFacade = new AvailabilityFacade();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
     }
 
     [Fact]
@@ -23,7 +23,26 @@ public class AvailabilityFacadeTest
         await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
 
         //then
-        //todo check that availability(ies) was/were created
+        Assert.Equal(96, (await _availabilityFacade.Find(resourceId, oneDay)).Size);
+    }
+
+    [Fact]
+    public async Task CanCreateNewAvailabilitySlotsWithParentId()
+    {
+        //given
+        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId2 = ResourceAvailabilityId.NewOne();
+        var parentId = ResourceAvailabilityId.NewOne();
+        var differentParentId = ResourceAvailabilityId.NewOne();
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+
+        //when
+        await _availabilityFacade.CreateResourceSlots(resourceId, parentId, oneDay);
+        await _availabilityFacade.CreateResourceSlots(resourceId2, differentParentId, oneDay);
+
+        //then
+        Assert.Equal(96, (await _availabilityFacade.FindByParentId(parentId, oneDay)).Size);
+        Assert.Equal(96, (await _availabilityFacade.FindByParentId(differentParentId, oneDay)).Size);
     }
 
     [Fact]
@@ -40,7 +59,9 @@ public class AvailabilityFacadeTest
 
         //then
         Assert.True(result);
-        //todo check that can't be taken
+        var resourceAvailabilities = await _availabilityFacade.Find(resourceId, oneDay);
+        Assert.Equal(96, resourceAvailabilities.Size);
+        Assert.True(resourceAvailabilities.BlockedEntirelyBy(owner));
     }
 
     [Fact]
@@ -57,7 +78,9 @@ public class AvailabilityFacadeTest
 
         //then
         Assert.True(result);
-        //todo check that are disabled
+        var resourceAvailabilities = await _availabilityFacade.Find(resourceId, oneDay);
+        Assert.Equal(96, resourceAvailabilities.Size);
+        Assert.True(resourceAvailabilities.IsDisabledEntirelyBy(owner));
     }
 
     [Fact]
@@ -77,7 +100,8 @@ public class AvailabilityFacadeTest
 
         //then
         Assert.False(result);
-        //todo check that nothing was changed
+        var resourceAvailability = await _availabilityFacade.Find(resourceId, oneDay);
+        Assert.True(resourceAvailability.BlockedEntirelyBy(owner));
     }
 
 
@@ -98,7 +122,8 @@ public class AvailabilityFacadeTest
 
         //then
         Assert.True(result);
-        //todo check can be taken again
+        var resourceAvailability = await _availabilityFacade.Find(resourceId, oneDay);
+        Assert.True(resourceAvailability.IsEntirelyAvailable);
     }
 
     [Fact]
@@ -122,6 +147,33 @@ public class AvailabilityFacadeTest
 
         //then
         Assert.False(result);
-        //todo check still owned by jan1
+        var resourceAvailability = await _availabilityFacade.Find(resourceId, jan1);
+        Assert.True(resourceAvailability.BlockedEntirelyBy(jan1Owner));
+    }
+    
+    [Fact]
+    public async Task OneSegmentCanBeTakenBySomeoneElseAfterRealising()
+    {
+        //given
+        var resourceId = ResourceAvailabilityId.NewOne();
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+        var fifteenMinutes = new TimeSlot(oneDay.From, oneDay.From.AddMinutes(15));
+        var owner = Owner.NewOne();
+        await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
+        //and
+        await _availabilityFacade.Block(resourceId, oneDay, owner);
+        //and
+        await _availabilityFacade.Release(resourceId, fifteenMinutes, owner);
+
+        //when
+        var newRequester = Owner.NewOne();
+        var result = await _availabilityFacade.Block(resourceId, fifteenMinutes, newRequester);
+
+        //then
+        Assert.True(result);
+        var resourceAvailability = await _availabilityFacade.Find(resourceId, oneDay);
+        Assert.Equal(96, resourceAvailability.Size);
+        Assert.Equal(95, resourceAvailability.FindBlockedBy(owner).Count);
+        Assert.Equal(1, resourceAvailability.FindBlockedBy(newRequester).Count);
     }
 }
