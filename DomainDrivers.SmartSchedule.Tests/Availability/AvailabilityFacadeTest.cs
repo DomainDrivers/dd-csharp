@@ -23,7 +23,9 @@ public class AvailabilityFacadeTest : IntegrationTest
         await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
 
         //then
-        Assert.Equal(96, (await _availabilityFacade.Find(resourceId, oneDay)).Size);
+        var entireMonth = TimeSlot.CreateMonthlyTimeSlotAtUtc(2021, 1);
+        var monthlyCalendar = await _availabilityFacade.LoadCalendar(resourceId, entireMonth);
+        Assert.Equal(Calendar.WithAvailableSlots(resourceId, oneDay), monthlyCalendar);
     }
 
     [Fact]
@@ -59,9 +61,10 @@ public class AvailabilityFacadeTest : IntegrationTest
 
         //then
         Assert.True(result);
-        var resourceAvailabilities = await _availabilityFacade.Find(resourceId, oneDay);
-        Assert.Equal(96, resourceAvailabilities.Size);
-        Assert.True(resourceAvailabilities.BlockedEntirelyBy(owner));
+        var entireMonth = TimeSlot.CreateMonthlyTimeSlotAtUtc(2021, 1);
+        var monthlyCalendar = await _availabilityFacade.LoadCalendar(resourceId, entireMonth);
+        Assert.Empty(monthlyCalendar.AvailableSlots());
+        Assert.True(monthlyCalendar.TakenBy(owner).SequenceEqual(new[] { oneDay }));
     }
 
     [Fact]
@@ -171,9 +174,9 @@ public class AvailabilityFacadeTest : IntegrationTest
 
         //then
         Assert.True(result);
-        var resourceAvailability = await _availabilityFacade.Find(resourceId, oneDay);
-        Assert.Equal(96, resourceAvailability.Size);
-        Assert.Equal(95, resourceAvailability.FindBlockedBy(owner).Count);
-        Assert.Equal(1, resourceAvailability.FindBlockedBy(newRequester).Count);
+        var dailyCalendar = await _availabilityFacade.LoadCalendar(resourceId, oneDay);
+        Assert.Empty(dailyCalendar.AvailableSlots());
+        Assert.True(dailyCalendar.TakenBy(owner).SequenceEqual(oneDay.LeftoverAfterRemovingCommonWith(fifteenMinutes)));
+        Assert.True(dailyCalendar.TakenBy(newRequester).SequenceEqual(new[] { fifteenMinutes }));
     }
 }

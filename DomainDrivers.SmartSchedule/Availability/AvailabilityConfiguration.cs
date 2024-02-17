@@ -6,6 +6,7 @@ public static class AvailabilityConfiguration
     {
         serviceCollection.AddTransient<AvailabilityFacade>();
         serviceCollection.AddTransient<ResourceAvailabilityRepository>();
+        serviceCollection.AddTransient<ResourceAvailabilityReadModel>();
         return serviceCollection;
     }
 }

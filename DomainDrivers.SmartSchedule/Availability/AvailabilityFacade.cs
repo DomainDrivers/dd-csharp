@@ -7,11 +7,14 @@ namespace DomainDrivers.SmartSchedule.Availability;
 public class AvailabilityFacade
 {
     private readonly ResourceAvailabilityRepository _availabilityRepository;
+    private readonly ResourceAvailabilityReadModel _availabilityReadModel;
     private readonly IUnitOfWork _unitOfWork;
 
-    public AvailabilityFacade(ResourceAvailabilityRepository availabilityRepository, IUnitOfWork unitOfWork)
+    public AvailabilityFacade(ResourceAvailabilityRepository availabilityRepository,
+        ResourceAvailabilityReadModel availabilityReadModel, IUnitOfWork unitOfWork)
     {
         _availabilityRepository = availabilityRepository;
+        _availabilityReadModel = availabilityReadModel;
         _unitOfWork = unitOfWork;
     }
 
@@ -85,6 +88,16 @@ public class AvailabilityFacade
     {
         var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
         return new ResourceGroupedAvailability(await _availabilityRepository.LoadAllWithinSlot(resourceId, normalized));
+    }
+    
+    public async Task<Calendar> LoadCalendar(ResourceId resourceId, TimeSlot within) {
+        var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
+        return await _availabilityReadModel.Load(resourceId, normalized);
+    }
+
+    public async Task<Calendars> LoadCalendars(ISet<ResourceId> resources, TimeSlot within) {
+        var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
+        return await _availabilityReadModel.LoadAll(resources, normalized);
     }
 
     public async Task<ResourceGroupedAvailability> Find(ResourceId resourceId, TimeSlot within)
