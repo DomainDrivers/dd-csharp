@@ -13,7 +13,7 @@ public class ResourceGroupedAvailability
 
     public IList<ResourceAvailability> Availabilities { get; }
 
-    public ResourceAvailabilityId? ResourceId
+    public ResourceId? ResourceId
     {
         get
         {
@@ -32,7 +32,7 @@ public class ResourceGroupedAvailability
         get { return Availabilities.All(ra => ra.BlockedBy.ByNone); }
     }
 
-    public static ResourceGroupedAvailability Of(ResourceAvailabilityId resourceId, TimeSlot timeslot)
+    public static ResourceGroupedAvailability Of(ResourceId resourceId, TimeSlot timeslot)
     {
         var resourceAvailabilities = Segments
             .Split(timeslot, DefaultSegment())
@@ -41,8 +41,8 @@ public class ResourceGroupedAvailability
         return new ResourceGroupedAvailability(resourceAvailabilities);
     }
 
-    public static ResourceGroupedAvailability Of(ResourceAvailabilityId resourceId, TimeSlot timeslot,
-        ResourceAvailabilityId parentId)
+    public static ResourceGroupedAvailability Of(ResourceId resourceId, TimeSlot timeslot,
+        ResourceId parentId)
     {
         var resourceAvailabilities = Segments
             .Split(timeslot, DefaultSegment())
@@ -88,11 +88,6 @@ public class ResourceGroupedAvailability
         }
 
         return true;
-    }
-
-    public ISet<Owner> Owners()
-    {
-        return Availabilities.Select(x => x.BlockedBy).ToHashSet();
     }
 
     public bool BlockedEntirelyBy(Owner owner)

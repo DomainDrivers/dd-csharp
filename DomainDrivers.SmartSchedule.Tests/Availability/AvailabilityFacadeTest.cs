@@ -16,7 +16,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CanCreateAvailabilitySlots()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
 
         //when
@@ -30,10 +30,10 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CanCreateNewAvailabilitySlotsWithParentId()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
-        var resourceId2 = ResourceAvailabilityId.NewOne();
-        var parentId = ResourceAvailabilityId.NewOne();
-        var differentParentId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
+        var resourceId2 = ResourceId.NewOne();
+        var parentId = ResourceId.NewOne();
+        var differentParentId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
 
         //when
@@ -49,7 +49,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CanBlockAvailabilities()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var owner = Owner.NewOne();
         await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
@@ -68,7 +68,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CanDisableAvailabilities()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var owner = Owner.NewOne();
         await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
@@ -87,7 +87,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CantBlockEvenWhenJustSmallSegmentOfRequestedSlotIsBlocked()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var owner = Owner.NewOne();
         await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
@@ -109,7 +109,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CanReleaseAvailability()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var fifteenMinutes = new TimeSlot(oneDay.From, oneDay.From.AddMinutes(15));
         var owner = Owner.NewOne();
@@ -130,7 +130,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task CantReleaseEvenWhenJustPartOfSlotIsOwnedByTheRequester()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var jan1 = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var jan2 = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 2);
         var jan1_2 = new TimeSlot(jan1.From, jan2.To);
@@ -155,7 +155,7 @@ public class AvailabilityFacadeTest : IntegrationTest
     public async Task OneSegmentCanBeTakenBySomeoneElseAfterRealising()
     {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var fifteenMinutes = new TimeSlot(oneDay.From, oneDay.From.AddMinutes(15));
         var owner = Owner.NewOne();

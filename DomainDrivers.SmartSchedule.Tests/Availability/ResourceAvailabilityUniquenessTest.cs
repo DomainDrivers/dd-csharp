@@ -18,8 +18,8 @@ public class ResourceAvailabilityUniquenessTest : IntegrationTest
     [Fact]
     public async Task CantSaveTwoAvailabilitiesWithSameResourceIdAndSegment() {
         //given
-        var resourceId = ResourceAvailabilityId.NewOne();
-        var anotherResourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
+        var anotherResourceId = ResourceId.NewOne();
         var resourceAvailabilityId = ResourceAvailabilityId.NewOne();
 
         //when

@@ -1,15 +1,16 @@
-﻿using DomainDrivers.SmartSchedule.Shared;
+﻿using DomainDrivers.SmartSchedule.Availability;
+using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
-public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceName> Resources, TimeSpan Duration)
+public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceId> Resources, TimeSpan Duration)
 {
     public Stage OfDuration(TimeSpan duration)
     {
         return new Stage(StageName, Dependencies, Resources, duration);
     }
 
-    public Stage(string name) : this(name, new HashSet<Stage>(), new HashSet<ResourceName>(), TimeSpan.Zero)
+    public Stage(string name) : this(name, new HashSet<Stage>(), new HashSet<ResourceId>(), TimeSpan.Zero)
     {
     }
 
@@ -25,9 +26,9 @@ public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceNam
         get { return StageName; }
     }
 
-    public Stage WithChosenResourceCapabilities(params ResourceName[] resources)
+    public Stage WithChosenResourceCapabilities(params ResourceId[] resources)
     {
-        var collect = new HashSet<ResourceName>(resources);
+        var collect = new HashSet<ResourceId>(resources);
         return new Stage(StageName, Dependencies, collect, Duration);
     }
 

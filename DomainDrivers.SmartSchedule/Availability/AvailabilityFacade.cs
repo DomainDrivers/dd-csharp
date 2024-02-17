@@ -15,20 +15,20 @@ public class AvailabilityFacade
         _unitOfWork = unitOfWork;
     }
 
-    public async Task CreateResourceSlots(ResourceAvailabilityId resourceId, TimeSlot timeslot)
+    public async Task CreateResourceSlots(ResourceId resourceId, TimeSlot timeslot)
     {
         var groupedAvailability = ResourceGroupedAvailability.Of(resourceId, timeslot);
         await _availabilityRepository.SaveNew(groupedAvailability);
     }
 
-    public async Task CreateResourceSlots(ResourceAvailabilityId resourceId, ResourceAvailabilityId parentId,
+    public async Task CreateResourceSlots(ResourceId resourceId, ResourceId parentId,
         TimeSlot timeslot)
     {
         var groupedAvailability = ResourceGroupedAvailability.Of(resourceId, timeslot, parentId);
         await _availabilityRepository.SaveNew(groupedAvailability);
     }
 
-    public async Task<bool> Block(ResourceAvailabilityId resourceId, TimeSlot timeSlot, Owner requester)
+    public async Task<bool> Block(ResourceId resourceId, TimeSlot timeSlot, Owner requester)
     {
         return await _unitOfWork.InTransaction(async () =>
         {
@@ -49,7 +49,7 @@ public class AvailabilityFacade
         return result;
     }
 
-    public async Task<bool> Release(ResourceAvailabilityId resourceId, TimeSlot timeSlot, Owner requester)
+    public async Task<bool> Release(ResourceId resourceId, TimeSlot timeSlot, Owner requester)
     {
         return await _unitOfWork.InTransaction(async () =>
         {
@@ -65,7 +65,7 @@ public class AvailabilityFacade
         });
     }
 
-    public async Task<bool> Disable(ResourceAvailabilityId resourceId, TimeSlot timeSlot, Owner requester)
+    public async Task<bool> Disable(ResourceId resourceId, TimeSlot timeSlot, Owner requester)
     {
         return await _unitOfWork.InTransaction(async () =>
         {
@@ -81,19 +81,19 @@ public class AvailabilityFacade
         });
     }
 
-    private async Task<ResourceGroupedAvailability> FindGrouped(ResourceAvailabilityId resourceId, TimeSlot within)
+    public async Task<ResourceGroupedAvailability> FindGrouped(ResourceId resourceId, TimeSlot within)
     {
         var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
         return new ResourceGroupedAvailability(await _availabilityRepository.LoadAllWithinSlot(resourceId, normalized));
     }
 
-    public async Task<ResourceGroupedAvailability> Find(ResourceAvailabilityId resourceId, TimeSlot within)
+    public async Task<ResourceGroupedAvailability> Find(ResourceId resourceId, TimeSlot within)
     {
         var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
         return new ResourceGroupedAvailability(await _availabilityRepository.LoadAllWithinSlot(resourceId, normalized));
     }
 
-    public async Task<ResourceGroupedAvailability> FindByParentId(ResourceAvailabilityId parentId, TimeSlot within)
+    public async Task<ResourceGroupedAvailability> FindByParentId(ResourceId parentId, TimeSlot within)
     {
         var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
         return new ResourceGroupedAvailability(

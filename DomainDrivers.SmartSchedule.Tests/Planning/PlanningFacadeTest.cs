@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
@@ -123,7 +124,7 @@ public class PlanningFacadeTest : IntegrationTest
         var projectId = await _projectFacade.AddNewProject("project");
 
         //when
-        var neededResources = new HashSet<ResourceName> { new ResourceName("resource1") };
+        var neededResources = new HashSet<ResourceId> { ResourceId.NewOne() };
         var firstHalfOfTheYear = new TimeSlot(DateTime.Parse("2021-01-01T00:00:00.00Z"),
             DateTime.Parse("2021-06-01T00:00:00.00Z"));
         await _projectFacade.DefineResourcesWithinDates(projectId, neededResources, firstHalfOfTheYear);

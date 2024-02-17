@@ -184,6 +184,6 @@ public class ResourceAvailabilityTest
     }
 
     private ResourceAvailability ResourceAvailability() {
-        return new ResourceAvailability(ResourceAvailabilityId, ResourceAvailabilityId.NewOne(), TimeSlot.CreateDailyTimeSlotAtUtc(2000, 1, 1));
+        return new ResourceAvailability(ResourceAvailabilityId, ResourceId.NewOne(), TimeSlot.CreateDailyTimeSlotAtUtc(2000, 1, 1));
     }
 }

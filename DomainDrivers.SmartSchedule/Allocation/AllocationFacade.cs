@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 using Microsoft.EntityFrameworkCore;
 

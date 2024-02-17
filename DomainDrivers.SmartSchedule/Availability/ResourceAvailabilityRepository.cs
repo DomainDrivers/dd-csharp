@@ -44,7 +44,7 @@ public class ResourceAvailabilityRepository
         await _dbConnection.ExecuteAsync(sql, rows);
     }
 
-    public async Task<IList<ResourceAvailability>> LoadAllWithinSlot(ResourceAvailabilityId resourceId,
+    public async Task<IList<ResourceAvailability>> LoadAllWithinSlot(ResourceId resourceId,
         TimeSlot segment)
     {
         var param = new
@@ -64,7 +64,7 @@ public class ResourceAvailabilityRepository
         return rows.Select(x => x.Map()).ToList();
     }
 
-    public async Task<IList<ResourceAvailability>> LoadAllByParentIdWithinSlot(ResourceAvailabilityId parentId,
+    public async Task<IList<ResourceAvailability>> LoadAllByParentIdWithinSlot(ResourceId parentId,
         TimeSlot segment)
     {
         var param = new
@@ -179,8 +179,8 @@ public class ResourceAvailabilityRepository
         public ResourceAvailability Map()
         {
             return new ResourceAvailability(new ResourceAvailabilityId(id),
-                new ResourceAvailabilityId(resource_id),
-                new ResourceAvailabilityId(resource_parent_id),
+                new ResourceId(resource_id),
+                new ResourceId(resource_parent_id),
                 new TimeSlot(from_date, to_date),
                 new Blockade(new Owner(taken_by), disabled),
                 (int)version);

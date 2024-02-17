@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
 using DomainDrivers.SmartSchedule.Shared;
@@ -74,7 +75,7 @@ public class PlanningFacade
         });
     }
 
-    public async Task DefineResourcesWithinDates(ProjectId projectId, HashSet<ResourceName> chosenResources,
+    public async Task DefineResourcesWithinDates(ProjectId projectId, HashSet<ResourceId> chosenResources,
         TimeSlot timeBoundaries)
     {
         await _unitOfWork.InTransaction(async () =>

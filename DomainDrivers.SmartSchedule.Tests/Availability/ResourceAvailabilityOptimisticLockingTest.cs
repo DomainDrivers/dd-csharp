@@ -19,7 +19,7 @@ public class ResourceAvailabilityOptimisticLockingTest : IntegrationTest
     {
         //given
         var resourceAvailabilityId = ResourceAvailabilityId.NewOne();
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var resourceAvailability = new ResourceAvailability(resourceAvailabilityId, resourceId, OneMonth);
         await _resourceAvailabilityRepository.SaveNew(resourceAvailability);
         
@@ -37,7 +37,7 @@ public class ResourceAvailabilityOptimisticLockingTest : IntegrationTest
     {
         //given
         var resourceAvailabilityId = ResourceAvailabilityId.NewOne();
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var resourceAvailability = new ResourceAvailability(resourceAvailabilityId, resourceId, OneMonth);
         await _resourceAvailabilityRepository.SaveNew(resourceAvailability);
         var results = new List<bool>();

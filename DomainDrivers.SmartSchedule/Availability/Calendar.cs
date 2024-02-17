@@ -2,15 +2,15 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Availability;
 
-public record Calendar(ResourceName ResourceId, IDictionary<Owner, IList<TimeSlot>> CalendarEntries)
+public record Calendar(ResourceId ResourceId, IDictionary<Owner, IList<TimeSlot>> CalendarEntries)
 {
-    public static Calendar WithAvailableSlots(ResourceName resourceId, params TimeSlot[] availableSlots)
+    public static Calendar WithAvailableSlots(ResourceId resourceId, params TimeSlot[] availableSlots)
     {
         return new Calendar(resourceId,
             new Dictionary<Owner, IList<TimeSlot>> { { Owner.None(), new List<TimeSlot>(availableSlots) } });
     }
 
-    public static Calendar Empty(ResourceName resourceId)
+    public static Calendar Empty(ResourceId resourceId)
     {
         return new Calendar(resourceId, new Dictionary<Owner, IList<TimeSlot>>());
     }
@@ -20,6 +20,16 @@ public record Calendar(ResourceName ResourceId, IDictionary<Owner, IList<TimeSlo
         if (CalendarEntries.TryGetValue(Owner.None(), out var availableSlots))
         {
             return availableSlots;
+        }
+
+        return new List<TimeSlot>();
+    }
+
+    public IList<TimeSlot> TakenBy(Owner requester)
+    {
+        if (CalendarEntries.TryGetValue(requester, out var slots))
+        {
+            return slots;
         }
 
         return new List<TimeSlot>();

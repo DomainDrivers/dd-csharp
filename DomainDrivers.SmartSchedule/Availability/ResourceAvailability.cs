@@ -5,14 +5,14 @@ namespace DomainDrivers.SmartSchedule.Availability;
 public class ResourceAvailability
 {
     public ResourceAvailabilityId Id { get; }
-    public ResourceAvailabilityId ResourceId { get; }
-    public ResourceAvailabilityId ResourceParentId { get; }
+    public ResourceId ResourceId { get; }
+    public ResourceId ResourceParentId { get; }
     public TimeSlot Segment { get; }
     public Blockade Blockade { get; private set; }
     public int Version { get; private set; }
 
-    public ResourceAvailability(ResourceAvailabilityId id, ResourceAvailabilityId resourceId,
-        ResourceAvailabilityId resourceParentId, TimeSlot segment, Blockade blockade, int version)
+    public ResourceAvailability(ResourceAvailabilityId id, ResourceId resourceId,
+        ResourceId resourceParentId, TimeSlot segment, Blockade blockade, int version)
     {
         Id = id;
         ResourceId = resourceId;
@@ -22,18 +22,18 @@ public class ResourceAvailability
         Version = version;
     }
 
-    public ResourceAvailability(ResourceAvailabilityId availabilityId, ResourceAvailabilityId resourceId,
+    public ResourceAvailability(ResourceAvailabilityId availabilityId, ResourceId resourceId,
         TimeSlot segment)
     {
         Id = availabilityId;
         ResourceId = resourceId;
-        ResourceParentId = ResourceAvailabilityId.None();
+        ResourceParentId = ResourceId.None();
         Segment = segment;
         Blockade = Blockade.None();
     }
 
-    public ResourceAvailability(ResourceAvailabilityId availabilityId, ResourceAvailabilityId resourceId,
-        ResourceAvailabilityId resourceParentId, TimeSlot segment)
+    public ResourceAvailability(ResourceAvailabilityId availabilityId, ResourceId resourceId,
+        ResourceId resourceParentId, TimeSlot segment)
     {
         Id = availabilityId;
         ResourceId = resourceId;

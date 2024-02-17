@@ -1,4 +1,5 @@
 ﻿using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
@@ -34,7 +35,7 @@ public class CapabilityAllocatingTest : IntegrationTest
         Assert.NotNull(result);
         var summary = await _allocationFacade.FindAllProjectsAllocations();
         Assert.Equal(
-            new HashSet<AllocatedCapability>() { new AllocatedCapability(allocatableResourceId.Id, skillJava, oneDay) },
+            new HashSet<AllocatedCapability>() { new AllocatedCapability(allocatableResourceId.Id!.Value, skillJava, oneDay) },
             summary.ProjectAllocations[projectId].All
         );
         Assert.True(summary.Demands[projectId].All.SequenceEqual(new[] { demand }));

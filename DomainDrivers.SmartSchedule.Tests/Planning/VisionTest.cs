@@ -1,4 +1,5 @@
-﻿using DomainDrivers.SmartSchedule.Planning;
+﻿using DomainDrivers.SmartSchedule.Availability;
+using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Shared;
 using static DomainDrivers.SmartSchedule.Shared.Capability;
@@ -20,9 +21,9 @@ public class VisionTest : IntegrationTest
     static readonly TimeSlot Jan2_12 = new TimeSlot(DateTime.Parse("2020-01-02T00:00:00.00Z"),
         DateTime.Parse("2020-01-12T00:00:00.00Z"));
 
-    static readonly ResourceName Resource1 = new ResourceName("r1");
-    static readonly ResourceName Resource2 = new ResourceName("r2");
-    static readonly ResourceName Resource4 = new ResourceName("r4");
+    static readonly ResourceId Resource1 = ResourceId.NewOne();
+    static readonly ResourceId Resource2 = ResourceId.NewOne();
+    static readonly ResourceId Resource4 = ResourceId.NewOne();
 
     private readonly PlanningFacade _projectFacade;
 

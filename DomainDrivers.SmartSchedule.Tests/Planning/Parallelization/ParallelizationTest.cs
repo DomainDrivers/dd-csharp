@@ -1,15 +1,15 @@
-﻿using DomainDrivers.SmartSchedule.Planning.Parallelization;
-using DomainDrivers.SmartSchedule.Shared;
+﻿using DomainDrivers.SmartSchedule.Availability;
+using DomainDrivers.SmartSchedule.Planning.Parallelization;
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning.Parallelization;
 
 public class ParallelizationTest
 {
     private static readonly StageParallelization StageParallelization = new StageParallelization();
-    private static readonly ResourceName Leon = new ResourceName("Leon");
-    private static readonly ResourceName Eryk = new ResourceName("Eric");
-    private static readonly ResourceName Slawek = new ResourceName("Sławek");
-    private static readonly ResourceName Kuba = new ResourceName("Kuba");
+    private static readonly ResourceId Leon = ResourceId.NewOne();
+    private static readonly ResourceId Eryk = ResourceId.NewOne();
+    private static readonly ResourceId Slawek = ResourceId.NewOne();
+    private static readonly ResourceId Kuba = ResourceId.NewOne();
 
     [Fact]
     public void EverythingCanBeDoneInParallelWhenThereAreNoDependencies()

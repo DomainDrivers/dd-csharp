@@ -18,7 +18,7 @@ public class ResourceAvailabilityLoadingTest : IntegrationTest
     {
         //given
         var resourceAvailabilityId = ResourceAvailabilityId.NewOne();
-        var resourceId = ResourceAvailabilityId.NewOne();
+        var resourceId = ResourceId.NewOne();
         var resourceAvailability = new ResourceAvailability(resourceAvailabilityId, resourceId, OneMonth);
 
         //when

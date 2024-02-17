@@ -1,4 +1,5 @@
 ﻿using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 using NUnit.Framework.Legacy;
 using static DomainDrivers.SmartSchedule.Shared.Capability;
@@ -177,8 +178,8 @@ public class AllocationsToProjectTest
         Assert.Equal(new CapabilityReleased(@event!.EventId, ProjectId, Demands.None(), When), @event);
         CollectionAssert.AreEquivalent(new List<AllocatedCapability>
         {
-            new AllocatedCapability(AdminId.Id, Permission("ADMIN"), oneHourBefore),
-            new AllocatedCapability(AdminId.Id, Permission("ADMIN"), theRest)
+            new AllocatedCapability(AdminId.Id!.Value, Permission("ADMIN"), oneHourBefore),
+            new AllocatedCapability(AdminId.Id!.Value, Permission("ADMIN"), theRest)
         }, allocations.Allocations.All);
     }
 

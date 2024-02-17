@@ -19,7 +19,7 @@ public class PlanChosenResources
         _unitOfWork = unitOfWork;
     }
 
-    public async Task DefineResourcesWithinDates(ProjectId projectId, ISet<ResourceName> chosenResources,
+    public async Task DefineResourcesWithinDates(ProjectId projectId, ISet<ResourceId> chosenResources,
         TimeSlot timeBoundaries)
     {
         await _unitOfWork.InTransaction(async () =>
@@ -50,7 +50,7 @@ public class PlanChosenResources
         return Schedule.BasedOnChosenResourcesAvailability(neededResourcesCalendars, stages);
     }
 
-    private ISet<ResourceName> NeededResources(Stage[] stages)
+    private ISet<ResourceId> NeededResources(Stage[] stages)
     {
         return stages.SelectMany(stage => stage.Resources).ToHashSet();
     }

@@ -2,7 +2,7 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Availability;
 
-public record Calendars(IDictionary<ResourceName, Calendar> CalendarsDictionary)
+public record Calendars(IDictionary<ResourceId, Calendar> CalendarsDictionary)
 {
     public static Calendars Of(params Calendar[] calendars)
     {
@@ -11,7 +11,7 @@ public record Calendars(IDictionary<ResourceName, Calendar> CalendarsDictionary)
         return new Calendars(collect);
     }
 
-    public Calendar Get(ResourceName resourceId)
+    public Calendar Get(ResourceId resourceId)
     {
         if (CalendarsDictionary.TryGetValue(resourceId, out var calendar))
         {

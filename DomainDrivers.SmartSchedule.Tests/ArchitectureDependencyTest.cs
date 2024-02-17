@@ -50,6 +50,7 @@ public class ArchitectureDependencyTest
             .Should().NotDependOnAny(
                 Types().That().AreNot(ParallelizationLayer)
                     .And().AreNot(SharedLayer)
+                    .And().AreNot(AvailabilityLayer)
                     .And().AreNot(SorterLayer))
             .Check(Architecture);
         Types().That().Are(SorterLayer)

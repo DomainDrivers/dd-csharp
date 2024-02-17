@@ -127,9 +127,9 @@ public class ScheduleCalculationTest
     public void CanAdjustScheduleToAvailabilityOfNeededResources()
     {
         //given
-        var r1 = new ResourceName("r1");
-        var r2 = new ResourceName("r2");
-        var r3 = new ResourceName("r3");
+        var r1 = ResourceId.NewOne();
+        var r2 = ResourceId.NewOne();
+        var r3 = ResourceId.NewOne();
         //and
         var stage1 = new Stage("Stage1")
             .OfDuration(TimeSpan.FromDays(3))

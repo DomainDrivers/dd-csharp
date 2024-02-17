@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
@@ -42,7 +43,7 @@ public class ProjectAllocations
     public CapabilitiesAllocated? Allocate(ResourceId resourceId, Capability capability,
         TimeSlot requestedSlot, DateTime when)
     {
-        var allocatedCapability = new AllocatedCapability(resourceId.Id, capability, requestedSlot);
+        var allocatedCapability = new AllocatedCapability(resourceId.Id!.Value, capability, requestedSlot);
         var newAllocations = Allocations.Add(allocatedCapability);
         if (NothingAllocated(newAllocations) || !WithinProjectTimeSlot(requestedSlot))
         {

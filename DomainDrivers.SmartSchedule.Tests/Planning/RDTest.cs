@@ -1,4 +1,4 @@
-﻿using DomainDrivers.SmartSchedule.Allocation;
+﻿using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Shared;
@@ -42,13 +42,13 @@ public class RDTest : IntegrationTest
         //given
         var projectId = await _projectFacade.AddNewProject("waterfall");
         //and
-        var r1 = new ResourceName("r1");
+        var r1 = ResourceId.NewOne();
         var javaAvailableInJanuary = ResourceAvailableForCapabilityInPeriod(r1, Capability.Skill("JAVA"), January);
-        var r2 = new ResourceName("r2");
+        var r2 = ResourceId.NewOne();
         var phpAvailableInFebruary = ResourceAvailableForCapabilityInPeriod(r2, Capability.Skill("PHP"), February);
-        var r3 = new ResourceName("r3");
+        var r3 = ResourceId.NewOne();
         var csharpAvailableInMarch = ResourceAvailableForCapabilityInPeriod(r3, Capability.Skill("CSHARP"), March);
-        var allResources = new HashSet<ResourceName> { r1, r2, r3 };
+        var allResources = new HashSet<ResourceId> { r1, r2, r3 };
 
         //when
         await _projectFacade.DefineResourcesWithinDates(projectId, allResources, January);
@@ -95,7 +95,7 @@ public class RDTest : IntegrationTest
         ProjectIsNotParallelized(loaded);
     }
 
-    private ResourceId ResourceAvailableForCapabilityInPeriod(ResourceName resource, Capability capability,
+    private ResourceId ResourceAvailableForCapabilityInPeriod(ResourceId resource, Capability capability,
         TimeSlot slot)
     {
         //todo
