@@ -37,8 +37,7 @@ public class PlanChosenResources
             var neededResources = NeededResources(stages);
             var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
             await DefineResourcesWithinDates(projectId, neededResources, timeBoundaries);
-            //TODO when availability is implemented
-            var neededResourcesCalendars = Calendars.Of();
+            var neededResourcesCalendars = await _availabilityFacade.LoadCalendars(neededResources, timeBoundaries);
             var schedule = CreateScheduleAdjustingToCalendars(neededResourcesCalendars, stages.ToList());
             project.AddSchedule(schedule);
         });

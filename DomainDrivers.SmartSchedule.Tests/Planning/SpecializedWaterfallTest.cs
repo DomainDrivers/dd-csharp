@@ -45,7 +45,7 @@ public class SpecializedWaterfallTest : IntegrationTest
         await _projectFacade.DefineProjectStages(projectId, stageBeforeCritical, criticalStage, stageAfterCritical);
 
         //and
-        var criticalResourceName = new ResourceName("criticalResourceName");
+        var criticalResourceName = ResourceId.NewOne();
         var criticalCapabilityAvailability =
             ResourceAvailableForCapabilityInPeriod(criticalResourceName, Capability.Skill("JAVA"), Jan1_6);
 
@@ -80,7 +80,7 @@ public class SpecializedWaterfallTest : IntegrationTest
     {
     }
 
-    private ResourceId ResourceAvailableForCapabilityInPeriod(ResourceName resource, Capability capability,
+    private ResourceId ResourceAvailableForCapabilityInPeriod(ResourceId resource, Capability capability,
         TimeSlot slot)
     {
         return null!;

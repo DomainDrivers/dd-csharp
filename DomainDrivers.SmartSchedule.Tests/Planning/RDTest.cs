@@ -30,24 +30,26 @@ public class RDTest : IntegrationTest
         DateTime.Parse("2020-03-06T00:00:00.00Z"));
 
     private readonly PlanningFacade _projectFacade;
+    private readonly AvailabilityFacade _availabilityFacade;
 
     public RDTest(IntegrationTestApp testApp) : base(testApp)
     {
         _projectFacade = Scope.ServiceProvider.GetRequiredService<PlanningFacade>();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
     }
 
-    [Fact(Skip = "not implemented yet")]
+    [Fact]
     public async Task ResearchAndDevelopmentProjectProcess()
     {
         //given
         var projectId = await _projectFacade.AddNewProject("waterfall");
         //and
         var r1 = ResourceId.NewOne();
-        var javaAvailableInJanuary = ResourceAvailableForCapabilityInPeriod(r1, Capability.Skill("JAVA"), January);
+        var javaAvailableInJanuary = await ResourceAvailableForCapabilityInPeriod(r1, Capability.Skill("JAVA"), January);
         var r2 = ResourceId.NewOne();
-        var phpAvailableInFebruary = ResourceAvailableForCapabilityInPeriod(r2, Capability.Skill("PHP"), February);
+        var phpAvailableInFebruary = await ResourceAvailableForCapabilityInPeriod(r2, Capability.Skill("PHP"), February);
         var r3 = ResourceId.NewOne();
-        var csharpAvailableInMarch = ResourceAvailableForCapabilityInPeriod(r3, Capability.Skill("CSHARP"), March);
+        var csharpAvailableInMarch = await ResourceAvailableForCapabilityInPeriod(r3, Capability.Skill("CSHARP"), March);
         var allResources = new HashSet<ResourceId> { r1, r2, r3 };
 
         //when
@@ -95,10 +97,10 @@ public class RDTest : IntegrationTest
         ProjectIsNotParallelized(loaded);
     }
 
-    private ResourceId ResourceAvailableForCapabilityInPeriod(ResourceId resource, Capability capability,
+    private async Task<ResourceId> ResourceAvailableForCapabilityInPeriod(ResourceId resource, Capability capability,
         TimeSlot slot)
     {
-        //todo
+        await _availabilityFacade.CreateResourceSlots(resource, slot);
         return ResourceId.NewOne();
     }
 

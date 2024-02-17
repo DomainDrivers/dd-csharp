@@ -94,7 +94,7 @@ public class PlanningFacade
     }
 
     public async Task PlanCriticalStageWithResource(ProjectId projectId, Stage criticalStage,
-        ResourceName criticalResource,
+        ResourceId resourceId,
         TimeSlot stageTimeSlot)
     {
         await _unitOfWork.InTransaction(async () =>
