@@ -5,6 +5,9 @@ using DomainDrivers.SmartSchedule.Allocation;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Planning;
+using DomainDrivers.SmartSchedule.Resource;
+using DomainDrivers.SmartSchedule.Resource.Device;
+using DomainDrivers.SmartSchedule.Resource.Employee;
 using DomainDrivers.SmartSchedule.Shared;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -22,6 +25,9 @@ builder.Services.AddPlanning();
 builder.Services.AddAvailability();
 builder.Services.AddAllocation();
 builder.Services.AddCashFlow();
+builder.Services.AddEmployee();
+builder.Services.AddDevice();
+builder.Services.AddResource();
 
 var app = builder.Build();
 

@@ -17,8 +17,23 @@ public record Capability(string Name, string Type)
         return new Capability(asset, "ASSET");
     }
 
-    public static IList<Capability> Skills(params string[] skills)
+    public static ISet<Capability> Skills(params string[] skills)
     {
-        return skills.Select(x => Capability.Skill(x)).ToList();
+        return skills.Select(x => Skill(x)).ToHashSet();
+    }
+    
+    public static ISet<Capability> Assets(params string[] assets)
+    {
+        return assets.Select(x => Asset(x)).ToHashSet();
+    }
+    
+    public static ISet<Capability> Permissions(params string[] permissions)
+    {
+        return permissions.Select(x => Permission(x)).ToHashSet();
+    }
+    
+    public bool IsOfType(string type)
+    {
+        return Type == type;
     }
 }
