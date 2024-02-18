@@ -1,5 +1,4 @@
 ﻿using DomainDrivers.SmartSchedule.Availability;
-using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
@@ -44,9 +43,11 @@ public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceId>
     
     public override int GetHashCode()
     {
-        return HashCode.Combine(StageName,
-            Dependencies.CalculateHashCode(),
-            Resources.CalculateHashCode(),
-            Duration);
+        return StageName.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return StageName;
     }
 }

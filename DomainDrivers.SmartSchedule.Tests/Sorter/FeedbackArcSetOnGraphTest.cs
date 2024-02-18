@@ -21,7 +21,7 @@ public class FeedbackArcSetOnGraphTest
         node3 = node3.DependsOn(node1);
         
         //when
-        var toRemove = FeedbackArcSetOnGraph.Calculate(new List<Node<string>> {node1, node2, node3, node4});
+        var toRemove = new FeedbackArcSetOnGraph<string>().Calculate(new List<Node<string>> {node1, node2, node3, node4});
         
         //then
         CollectionAssert.AreEquivalent(new[] { new Edge(3, 1), new Edge(4, 3) }, toRemove);
@@ -40,7 +40,7 @@ public class FeedbackArcSetOnGraphTest
         node3 = node3.DependsOn(node4);
         
         //when
-        var toRemove = FeedbackArcSetOnGraph.Calculate(new List<Node<string>> {node1, node2, node3, node4});
+        var toRemove = new FeedbackArcSetOnGraph<string>().Calculate(new List<Node<string>> {node1, node2, node3, node4});
 
         //then
         Assert.Empty(toRemove);

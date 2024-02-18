@@ -1,8 +1,8 @@
 ﻿namespace DomainDrivers.SmartSchedule.Sorter;
 
-public class FeedbackArcSetOnGraph
+public class FeedbackArcSetOnGraph<T> where T : class
 {
-    public static IList<Edge> Calculate(IList<Node<string>> initialNodes)
+    public IList<Edge> Calculate(IList<Node<T>> initialNodes)
     {
         var adjacencyList = CreateAdjacencyList(initialNodes);
         var v = adjacencyList.Count;
@@ -32,7 +32,7 @@ public class FeedbackArcSetOnGraph
         return feedbackEdges;
     }
 
-    private static Dictionary<int, IList<int>> CreateAdjacencyList(IList<Node<string>> initialNodes)
+    private static Dictionary<int, IList<int>> CreateAdjacencyList(IList<Node<T>> initialNodes)
     {
         var adjacencyList = new Dictionary<int, IList<int>>();
 
@@ -53,10 +53,3 @@ public class FeedbackArcSetOnGraph
     }
 }
 
-public record Edge(int Source, int Target)
-{
-    public override string ToString()
-    {
-        return $"({Source} -> {Target})";
-    }
-}
