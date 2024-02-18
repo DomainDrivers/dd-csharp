@@ -49,7 +49,11 @@ public class AllocationFacade
     {
         return await _unitOfWork.InTransaction<Guid?>(async () =>
         {
-            //TODO WHAT TO DO WITH AVAILABILITY HERE? - implement
+            //yes, one transaction crossing 2 modules.
+            if (!await _availabilityFacade.Block(resourceId, timeSlot, Owner.Of(projectId.Id)))
+            {
+                return null;
+            }
             var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
             var @event = allocations.Allocate(resourceId, capability, timeSlot, _timeProvider.GetUtcNow().DateTime);
             if (@event == null)
@@ -65,7 +69,7 @@ public class AllocationFacade
     {
         return await _unitOfWork.InTransaction(async () =>
         {
-            //TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
+            //TODO WHAT TO DO WITH AVAILABILITY HERE?
             var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
             var @event = allocations.Release(allocatableCapabilityId, timeSlot, _timeProvider.GetUtcNow().DateTime);
             return @event != null;
