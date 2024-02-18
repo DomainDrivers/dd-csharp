@@ -32,6 +32,11 @@ public class ResourceGroupedAvailability
         get { return Availabilities.All(ra => ra.BlockedBy.ByNone); }
     }
 
+    public bool HasNoSlots
+    {
+        get { return Availabilities.Count == 0; }
+    }
+    
     public static ResourceGroupedAvailability Of(ResourceId resourceId, TimeSlot timeslot)
     {
         var resourceAvailabilities = Segments

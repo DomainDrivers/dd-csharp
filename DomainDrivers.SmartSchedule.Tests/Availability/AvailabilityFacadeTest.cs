@@ -66,6 +66,21 @@ public class AvailabilityFacadeTest : IntegrationTest
         Assert.Empty(monthlyCalendar.AvailableSlots());
         Assert.True(monthlyCalendar.TakenBy(owner).SequenceEqual(new[] { oneDay }));
     }
+    
+    [Fact]
+    public async Task CantBlockWhenNoSlotsCreated()
+    {
+        //given
+        var resourceId = ResourceId.NewOne();
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+        var owner = Owner.NewOne();
+
+        //when
+        var result = await _availabilityFacade.Block(resourceId, oneDay, owner);
+
+        //then
+        Assert.False(result);
+    }
 
     [Fact]
     public async Task CanDisableAvailabilities()
@@ -84,6 +99,21 @@ public class AvailabilityFacadeTest : IntegrationTest
         var resourceAvailabilities = await _availabilityFacade.Find(resourceId, oneDay);
         Assert.Equal(96, resourceAvailabilities.Size);
         Assert.True(resourceAvailabilities.IsDisabledEntirelyBy(owner));
+    }
+    
+    [Fact]
+    public async Task CantDisableWhenNoSlotsCreated()
+    {
+        //given
+        var resourceId = ResourceId.NewOne();
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+        var owner = Owner.NewOne();
+
+        //when
+        var result = await _availabilityFacade.Disable(resourceId, oneDay, owner);
+
+        //then
+        Assert.False(result);
     }
 
     [Fact]
@@ -127,6 +157,21 @@ public class AvailabilityFacadeTest : IntegrationTest
         Assert.True(result);
         var resourceAvailability = await _availabilityFacade.Find(resourceId, oneDay);
         Assert.True(resourceAvailability.IsEntirelyAvailable);
+    }
+    
+    [Fact]
+    public async Task CantReleaseWhenNoSlotsCreated()
+    {
+        //given
+        var resourceId = ResourceId.NewOne();
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+        var owner = Owner.NewOne();
+
+        //when
+        var result = await _availabilityFacade.Release(resourceId, oneDay, owner);
+
+        //then
+        Assert.False(result);
     }
 
     [Fact]
