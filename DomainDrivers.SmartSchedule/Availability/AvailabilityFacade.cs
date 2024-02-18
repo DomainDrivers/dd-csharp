@@ -42,6 +42,10 @@ public class AvailabilityFacade
 
     private async Task<bool> Block(Owner requester, ResourceGroupedAvailability toBlock)
     {
+        if (toBlock.HasNoSlots)
+        {
+            return false;
+        }
         var result = toBlock.Block(requester);
 
         if (result)
@@ -57,6 +61,11 @@ public class AvailabilityFacade
         return await _unitOfWork.InTransaction(async () =>
         {
             var toRelease = await FindGrouped(resourceId, timeSlot);
+            if (toRelease.HasNoSlots)
+            {
+                return false;
+            }
+
             var result = toRelease.Release(requester);
 
             if (result)
@@ -73,6 +82,11 @@ public class AvailabilityFacade
         return await _unitOfWork.InTransaction(async () =>
         {
             var toDisable = await FindGrouped(resourceId, timeSlot);
+            if (toDisable.HasNoSlots)
+            {
+                return false;
+            }
+
             var result = toDisable.Disable(requester);
 
             if (result)

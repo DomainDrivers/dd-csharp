@@ -16,4 +16,9 @@ public record Owner(Guid? OwnerId)
     {
         return new Owner(Guid.NewGuid());
     }
+
+    public static Owner Of(Guid id)
+    {
+        return new Owner(id);
+    }
 }

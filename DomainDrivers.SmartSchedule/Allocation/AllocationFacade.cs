@@ -7,12 +7,15 @@ namespace DomainDrivers.SmartSchedule.Allocation;
 public class AllocationFacade
 {
     private readonly IAllocationDbContext _allocationDbContext;
+    private readonly AvailabilityFacade _availabilityFacade;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public AllocationFacade(IAllocationDbContext allocationDbContext, TimeProvider timeProvider, IUnitOfWork unitOfWork)
+    public AllocationFacade(IAllocationDbContext allocationDbContext, AvailabilityFacade availabilityFacade,
+        TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
         _allocationDbContext = allocationDbContext;
+        _availabilityFacade = availabilityFacade;
         _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
@@ -46,6 +49,7 @@ public class AllocationFacade
     {
         return await _unitOfWork.InTransaction<Guid?>(async () =>
         {
+            //TODO WHAT TO DO WITH AVAILABILITY HERE? - implement
             var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
             var @event = allocations.Allocate(resourceId, capability, timeSlot, _timeProvider.GetUtcNow().DateTime);
             if (@event == null)
@@ -61,6 +65,7 @@ public class AllocationFacade
     {
         return await _unitOfWork.InTransaction(async () =>
         {
+            //TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
             var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
             var @event = allocations.Release(allocatableCapabilityId, timeSlot, _timeProvider.GetUtcNow().DateTime);
             return @event != null;
