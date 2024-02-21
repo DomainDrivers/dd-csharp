@@ -38,6 +38,9 @@ public class ArchitectureDependencyTest
     private static readonly IObjectProvider<IType> CashflowLayer =
         Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Allocation.Cashflow").As("Cashflow");
 
+    private static readonly IObjectProvider<IType> CapabilitySchedulingLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling").As("CapabilityScheduling");
+
     [Fact]
     public void CheckDependencies()
     {
@@ -80,7 +83,20 @@ public class ArchitectureDependencyTest
                     .And().AreNot(AvailabilityLayer)
                     .And().AreNot(CashflowLayer)
                     .And().AreNot(SimulationLayer)
-                    .And().AreNot(OptimizationLayer))
+                    .And().AreNot(OptimizationLayer)
+                    .And().AreNot(CapabilitySchedulingLayer))
+            .Check(Architecture);
+        Types().That().Are(CashflowLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(CashflowLayer)
+                    .And().AreNot(SharedLayer)
+                    .And().AreNot(AllocationLayer))
+            .Check(Architecture);
+        Types().That().Are(CapabilitySchedulingLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(CapabilitySchedulingLayer)
+                    .And().AreNot(SharedLayer)
+                    .And().AreNot(AvailabilityLayer))
             .Check(Architecture);
     }
 }

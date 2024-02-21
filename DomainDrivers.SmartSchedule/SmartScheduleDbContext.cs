@@ -1,4 +1,5 @@
 ﻿using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Resource.Device;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DomainDrivers.SmartSchedule;
 
 public class SmartScheduleDbContext : DbContext, IPlanningDbContext, IAllocationDbContext,
-    ICashflowDbContext, IEmployeeDbContext, IDeviceDbContext
+    ICashflowDbContext, IEmployeeDbContext, IDeviceDbContext, ICapabilitySchedulingDbContext
 {
     public SmartScheduleDbContext(DbContextOptions<SmartScheduleDbContext> options)
         : base(options)
@@ -20,6 +21,7 @@ public class SmartScheduleDbContext : DbContext, IPlanningDbContext, IAllocation
     public DbSet<Cashflow> Cashflows { get; set; } = null!;
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Device> Devices { get; set; } = null!;
+    public DbSet<AllocatableCapability> AllocatableCapabilities { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
