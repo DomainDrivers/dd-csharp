@@ -1,5 +1,5 @@
 ﻿using DomainDrivers.SmartSchedule.Allocation;
-using DomainDrivers.SmartSchedule.Availability;
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Shared;
 using NUnit.Framework.Legacy;
 using static DomainDrivers.SmartSchedule.Shared.Capability;
@@ -10,7 +10,7 @@ public class AllocationsToProjectTest
 {
     static readonly DateTime When = DateTime.MinValue;
     static readonly ProjectAllocationsId ProjectId = ProjectAllocationsId.NewOne();
-    static readonly ResourceId AdminId = ResourceId.NewOne();
+    static readonly AllocatableCapabilityId AdminId = AllocatableCapabilityId.NewOne();
     static readonly TimeSlot Feb1 = TimeSlot.CreateDailyTimeSlotAtUtc(2020, 2, 1);
     static readonly TimeSlot Feb2 = TimeSlot.CreateDailyTimeSlotAtUtc(2020, 2, 2);
     static readonly TimeSlot January = TimeSlot.CreateMonthlyTimeSlotAtUtc(2020, 1);
@@ -105,7 +105,8 @@ public class AllocationsToProjectTest
         //and
         var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, Feb1, When);
+        var adminId = new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId);
+        var @event = allocations.Release(adminId, Feb1, When);
 
         //then
         Assert.NotNull(@event);
@@ -119,7 +120,7 @@ public class AllocationsToProjectTest
         var allocations = ProjectAllocations.Empty(ProjectId);
 
         //when
-        var @event = allocations.Release(Guid.NewGuid(), Feb1, When);
+        var @event = allocations.Release(AllocatableCapabilityId.NewOne(), Feb1, When);
 
         //then
         Assert.Null(@event);
@@ -134,9 +135,9 @@ public class AllocationsToProjectTest
         var allocations = ProjectAllocations.WithDemands(ProjectId, Demands.Of(demandForAdmin, demandForJava));
         //and
         var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
-        allocations.Allocate(AdminId, Capability.Skill("JAVA"), Feb1, When);
+        allocations.Allocate(AllocatableCapabilityId.NewOne(), Capability.Skill("JAVA"), Feb1, When);
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, Feb1, When);
+        var @event = allocations.Release(new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId), Feb1, When);
 
         //then
         Assert.NotNull(@event);
@@ -152,7 +153,7 @@ public class AllocationsToProjectTest
         var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
 
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, Feb2, When);
+        var @event = allocations.Release(new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId), Feb2, When);
 
         //then
         Assert.Null(@event);
@@ -172,14 +173,14 @@ public class AllocationsToProjectTest
         var theRest = new TimeSlot(Feb1.From.AddHours(2), Feb1.To);
 
         //when
-        var @event = allocations.Release(allocatedAdmin!.AllocatedCapabilityId, fifteenMinutesIn1Feb, When);
+        var @event = allocations.Release(new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId), fifteenMinutesIn1Feb, When);
 
         //then
         Assert.Equal(new CapabilityReleased(@event!.EventId, ProjectId, Demands.None(), When), @event);
         CollectionAssert.AreEquivalent(new List<AllocatedCapability>
         {
-            new AllocatedCapability(AdminId.Id!.Value, Permission("ADMIN"), oneHourBefore),
-            new AllocatedCapability(AdminId.Id!.Value, Permission("ADMIN"), theRest)
+            new AllocatedCapability(AdminId, Permission("ADMIN"), oneHourBefore),
+            new AllocatedCapability(AdminId, Permission("ADMIN"), theRest)
         }, allocations.Allocations.All);
     }
 

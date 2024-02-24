@@ -9,7 +9,7 @@ public record PotentialTransfers(
     IDictionary<ProjectAllocationsId, Earnings> Earnings)
 {
     public PotentialTransfers Transfer(ProjectAllocationsId projectFrom, ProjectAllocationsId projectTo,
-        AllocatedCapability capability, TimeSlot forSlot)
+        AllocatedCapability allocatedCapability, TimeSlot forSlot)
     {
         Summary.ProjectAllocations.TryGetValue(projectFrom, out var from);
         Summary.ProjectAllocations.TryGetValue(projectTo, out var to);
@@ -18,7 +18,7 @@ public record PotentialTransfers(
             return this;
         }
 
-        var newAllocationsProjectFrom = from.Remove(capability.AllocatedCapabilityId, forSlot);
+        var newAllocationsProjectFrom = from.Remove(allocatedCapability.AllocatedCapabilityId, forSlot);
         if (newAllocationsProjectFrom == from)
         {
             return this;
@@ -26,7 +26,7 @@ public record PotentialTransfers(
 
         Summary.ProjectAllocations[projectFrom] = newAllocationsProjectFrom;
         var newAllocationsProjectTo =
-            to.Add(new AllocatedCapability(capability.ResourceId, capability.Capability, forSlot));
+            to.Add(new AllocatedCapability(allocatedCapability.AllocatedCapabilityId, allocatedCapability.Capability, forSlot));
         Summary.ProjectAllocations[projectTo] = newAllocationsProjectTo;
         return new PotentialTransfers(Summary, Earnings);
     }

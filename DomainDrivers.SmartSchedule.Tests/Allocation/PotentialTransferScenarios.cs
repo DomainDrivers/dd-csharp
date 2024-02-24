@@ -1,4 +1,5 @@
 using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Optimization;
 using DomainDrivers.SmartSchedule.Shared;
@@ -27,7 +28,7 @@ public class PotentialTransferScenarios
     private static readonly ProjectAllocationsId InsuranceSoftId = ProjectAllocationsId.NewOne();
 
     private static readonly AllocatedCapability StaszekJavaMid =
-        new AllocatedCapability(Guid.NewGuid(), Skill("JAVA-MID"), Jan1);
+        new AllocatedCapability(AllocatableCapabilityId.NewOne(), Skill("JAVA-MID"), Jan1);
 
     private readonly PotentialTransfersService _potentialTransfers =
         new PotentialTransfersService(new SimulationFacade(new OptimizationFacade()));

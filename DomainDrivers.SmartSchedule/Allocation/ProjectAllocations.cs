@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using DomainDrivers.SmartSchedule.Availability;
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
@@ -40,10 +40,10 @@ public class ProjectAllocations
         Demands = demands;
     }
 
-    public CapabilitiesAllocated? Allocate(ResourceId resourceId, Capability capability,
+    public CapabilitiesAllocated? Allocate(AllocatableCapabilityId allocatableCapabilityId, Capability capability,
         TimeSlot requestedSlot, DateTime when)
     {
-        var allocatedCapability = new AllocatedCapability(resourceId.Id!.Value, capability, requestedSlot);
+        var allocatedCapability = new AllocatedCapability(allocatableCapabilityId, capability, requestedSlot);
         var newAllocations = Allocations.Add(allocatedCapability);
         if (NothingAllocated(newAllocations) || !WithinProjectTimeSlot(requestedSlot))
         {
@@ -51,7 +51,7 @@ public class ProjectAllocations
         }
 
         Allocations = newAllocations;
-        return new CapabilitiesAllocated(allocatedCapability.AllocatedCapabilityId, ProjectId, MissingDemands(),
+        return new CapabilitiesAllocated(allocatedCapability.AllocatedCapabilityId.Id!.Value, ProjectId, MissingDemands(),
             when);
     }
 
@@ -70,7 +70,7 @@ public class ProjectAllocations
         return requestedSlot.Within(TimeSlot);
     }
 
-    public CapabilityReleased? Release(Guid allocatedCapabilityId, TimeSlot timeSlot, DateTime when)
+    public CapabilityReleased? Release(AllocatableCapabilityId allocatedCapabilityId, TimeSlot timeSlot, DateTime when)
     {
         var newAllocations = Allocations.Remove(allocatedCapabilityId, timeSlot);
         if (newAllocations == Allocations)

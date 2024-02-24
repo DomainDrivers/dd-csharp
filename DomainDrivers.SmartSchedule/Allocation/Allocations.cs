@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
@@ -15,7 +16,7 @@ public record Allocations(ISet<AllocatedCapability> All)
         return new Allocations(all);
     }
 
-    public Allocations Remove(Guid toRemove, TimeSlot slot)
+    public Allocations Remove(AllocatableCapabilityId toRemove, TimeSlot slot)
     {
         var allocatedCapability = Find(toRemove);
 
@@ -27,20 +28,20 @@ public record Allocations(ISet<AllocatedCapability> All)
         return RemoveFromSlot(allocatedCapability, slot);
     }
 
-    private Allocations RemoveFromSlot(AllocatedCapability allocatedResource, TimeSlot slot)
+    private Allocations RemoveFromSlot(AllocatedCapability allocatedCapability, TimeSlot slot)
     {
-        var leftOvers = allocatedResource.TimeSlot
+        var leftOvers = allocatedCapability.TimeSlot
             .LeftoverAfterRemovingCommonWith(slot)
-            .Where(leftOver => leftOver.Within(allocatedResource.TimeSlot))
-            .Select(leftOver => new AllocatedCapability(allocatedResource.ResourceId, allocatedResource.Capability, leftOver))
+            .Where(leftOver => leftOver.Within(allocatedCapability.TimeSlot))
+            .Select(leftOver => new AllocatedCapability(allocatedCapability.AllocatedCapabilityId, allocatedCapability.Capability, leftOver))
             .ToHashSet();
         var newSlots = new HashSet<AllocatedCapability>(All);
-        newSlots.Remove(allocatedResource);
+        newSlots.Remove(allocatedCapability);
         newSlots.UnionWith(leftOvers);
         return new Allocations(newSlots);
     }
 
-    public AllocatedCapability? Find(Guid allocatedCapabilityId)
+    public AllocatedCapability? Find(AllocatableCapabilityId allocatedCapabilityId)
     {
         return All.FirstOrDefault(ar => ar.AllocatedCapabilityId == allocatedCapabilityId);
     }

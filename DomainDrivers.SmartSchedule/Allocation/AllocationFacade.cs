@@ -1,3 +1,4 @@
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -44,13 +45,13 @@ public class AllocationFacade
         return ProjectsAllocationsSummary.Of(await _allocationDbContext.ProjectAllocations.ToListAsync());
     }
 
-    public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId, ResourceId resourceId,
+    public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId, AllocatableCapabilityId resourceId,
         Capability capability, TimeSlot timeSlot)
     {
         return await _unitOfWork.InTransaction<Guid?>(async () =>
         {
             //yes, one transaction crossing 2 modules.
-            if (!await _availabilityFacade.Block(resourceId, timeSlot, Owner.Of(projectId.Id)))
+            if (!await _availabilityFacade.Block(resourceId.ToAvailabilityResourceId(), timeSlot, Owner.Of(projectId.Id)))
             {
                 return null;
             }
@@ -65,7 +66,7 @@ public class AllocationFacade
         });
     }
     
-    public async Task<bool> ReleaseFromProject(ProjectAllocationsId projectId, Guid allocatableCapabilityId, TimeSlot timeSlot)
+    public async Task<bool> ReleaseFromProject(ProjectAllocationsId projectId, AllocatableCapabilityId allocatableCapabilityId, TimeSlot timeSlot)
     {
         return await _unitOfWork.InTransaction(async () =>
         {
