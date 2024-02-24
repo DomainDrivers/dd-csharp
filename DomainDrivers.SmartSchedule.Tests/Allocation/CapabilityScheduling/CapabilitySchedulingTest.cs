@@ -21,14 +21,14 @@ public class CapabilitySchedulingTest : IntegrationTest
     public async Task CanScheduleAllocatableCapabilities()
     {
         //given
-        var javaSkill = Capability.Skill("JAVA");
-        var rustSkill = Capability.Skill("RUST");
+        var javaSkill = CapabilitySelector.CanJustPerform(Capability.Skill("JAVA"));
+        var rustSkill = CapabilitySelector.CanJustPerform(Capability.Skill("RUST"));
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
 
         //when
         var allocatable =
             await _capabilityScheduler.ScheduleResourceCapabilitiesForPeriod(AllocatableResourceId.NewOne(),
-                new List<Capability> { javaSkill, rustSkill }, oneDay);
+                new List<CapabilitySelector> { javaSkill, rustSkill }, oneDay);
 
         //then
         var loaded = await _capabilityFinder.FindById(allocatable);
@@ -52,21 +52,22 @@ public class CapabilitySchedulingTest : IntegrationTest
     public async Task CapabilityIsFoundWhenCapabilityPresentInTimeSlot()
     {
         //given
-        var uniqueSkill = Capability.Permission("FITNESS-CLASS");
+        var fitnessClass = Capability.Permission("FITNESS-CLASS");
+        var uniqueSkill = CapabilitySelector.CanJustPerform(fitnessClass);
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         var anotherDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 2);
         //and
         await _capabilityScheduler.ScheduleResourceCapabilitiesForPeriod(AllocatableResourceId.NewOne(),
-            new List<Capability> { uniqueSkill }, oneDay);
+            new List<CapabilitySelector> { uniqueSkill }, oneDay);
 
         //when
-        var found = await _capabilityFinder.FindAvailableCapabilities(uniqueSkill, oneDay);
-        var notFound = await _capabilityFinder.FindAvailableCapabilities(uniqueSkill, anotherDay);
+        var found = await _capabilityFinder.FindAvailableCapabilities(fitnessClass, oneDay);
+        var notFound = await _capabilityFinder.FindAvailableCapabilities(fitnessClass, anotherDay);
 
         //then
         Assert.Single(found.All);
         Assert.Empty(notFound.All);
-        Assert.Equal(found.All[0].Capability, uniqueSkill);
+        Assert.Equal(found.All[0].Capabilities, uniqueSkill);
         Assert.Equal(found.All[0].TimeSlot, oneDay);
     }
 
@@ -74,15 +75,16 @@ public class CapabilitySchedulingTest : IntegrationTest
     public async Task CapabilityNotFoundWhenCapabilityNotPresent()
     {
         //given
-        var admin = Capability.Permission("ADMIN");
+        var admin = CapabilitySelector.CanJustPerform(Capability.Permission("ADMIN"));
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
         //and
         await _capabilityScheduler.ScheduleResourceCapabilitiesForPeriod(AllocatableResourceId.NewOne(),
-            new List<Capability> { admin }, oneDay);
+            new List<CapabilitySelector> { admin }, oneDay);
 
         //when
-        var rust = Capability.Skill("RUST JUST FOR NINJAS");
-        var found = await _capabilityFinder.FindCapabilities(rust, oneDay);
+        var rustSkill = Capability.Skill("RUST JUST FOR NINJAS");
+        var rust = CapabilitySelector.CanJustPerform(rustSkill);
+        var found = await _capabilityFinder.FindCapabilities(rustSkill, oneDay);
 
         //then
         Assert.Empty(found.All);
@@ -112,25 +114,55 @@ public class CapabilitySchedulingTest : IntegrationTest
     public async Task CanFindCapabilityIgnoringAvailability()
     {
         //given
-        var admin = Capability.Permission("REALLY_UNIQUE_ADMIN");
+        var adminPermission = Capability.Permission("REALLY_UNIQUE_ADMIN");
+        var admin = CapabilitySelector.CanJustPerform(adminPermission);
         var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(1111, 1, 1);
         var differentDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 2, 1);
         var hourWithinDay = new TimeSlot(oneDay.From, oneDay.From.AddSeconds(3600));
         var partiallyOverlappingDay = new TimeSlot(oneDay.From.AddSeconds(3600), oneDay.To.AddSeconds(3600));
         //and
         await _capabilityScheduler.ScheduleResourceCapabilitiesForPeriod(AllocatableResourceId.NewOne(),
-            new List<Capability> { admin }, oneDay);
+            new List<CapabilitySelector> { admin }, oneDay);
 
         //when
-        var onTheExactDay = await _capabilityFinder.FindCapabilities(admin, oneDay);
-        var onDifferentDay = await _capabilityFinder.FindCapabilities(admin, differentDay);
-        var inSlotWithin = await _capabilityFinder.FindCapabilities(admin, hourWithinDay);
-        var inOverlappingSlot = await _capabilityFinder.FindCapabilities(admin, partiallyOverlappingDay);
+        var onTheExactDay = await _capabilityFinder.FindCapabilities(adminPermission, oneDay);
+        var onDifferentDay = await _capabilityFinder.FindCapabilities(adminPermission, differentDay);
+        var inSlotWithin = await _capabilityFinder.FindCapabilities(adminPermission, hourWithinDay);
+        var inOverlappingSlot = await _capabilityFinder.FindCapabilities(adminPermission, partiallyOverlappingDay);
 
         //then
         Assert.Single(onTheExactDay.All);
         Assert.Single(inSlotWithin.All);
         Assert.Empty(onDifferentDay.All);
         Assert.Empty(inOverlappingSlot.All);
+    }
+
+    [Fact]
+    public async Task FindingTakesIntoAccountSimulationsCapabilities()
+    {
+        //given
+        var truckAssets = new HashSet<Capability>() { Capability.Asset("LOADING"), Capability.Asset("CARRYING") };
+        var truckCapabilities = CapabilitySelector.CanPerformAllAtTheTime(truckAssets);
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(1111, 1, 1);
+        //and
+        var truckResourceId = AllocatableResourceId.NewOne();
+        await _capabilityScheduler.ScheduleResourceCapabilitiesForPeriod(truckResourceId,
+            new List<CapabilitySelector>() { truckCapabilities }, oneDay);
+
+        //when
+        var canPerformBoth =
+            await _capabilityScheduler.FindResourceCapabilities(truckResourceId, truckAssets, oneDay);
+        var canPerformJustLoading =
+            await _capabilityScheduler.FindResourceCapabilities(truckResourceId, Capability.Asset("CARRYING"), oneDay);
+        var canPerformJustCarrying =
+            await _capabilityScheduler.FindResourceCapabilities(truckResourceId, Capability.Asset("LOADING"), oneDay);
+        var cantPerformJava =
+            await _capabilityScheduler.FindResourceCapabilities(truckResourceId, Capability.Skill("JAVA"), oneDay);
+
+        //then
+        Assert.NotNull(canPerformBoth);
+        Assert.NotNull(canPerformJustLoading);
+        Assert.NotNull(canPerformJustCarrying);
+        Assert.Null(cantPerformJava);
     }
 }

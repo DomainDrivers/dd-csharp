@@ -30,8 +30,8 @@ public class AllocatableCapabilityEntityTypeConfiguration : IEntityTypeConfigura
             .HasColumnName("id");
         builder.HasKey(x => x.Id);
 
-        builder.Property(p => p.Capability)
-            .HasColumnName("capability")
+        builder.Property(p => p.Capabilities)
+            .HasColumnName("possible_capabilities")
             .HasColumnType("jsonb");
 
         builder.Property<AllocatableResourceId>(x => x.ResourceId)

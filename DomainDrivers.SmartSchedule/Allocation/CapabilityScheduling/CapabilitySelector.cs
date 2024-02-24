@@ -14,6 +14,11 @@ public record CapabilitySelector(ISet<Capability> Capabilities, SelectingPolicy 
         return new CapabilitySelector(capabilities, SelectingPolicy.OneOfAll);
     }
 
+    public static CapabilitySelector CanJustPerform(Capability capability)
+    {
+        return new CapabilitySelector(new HashSet<Capability>() { capability }, SelectingPolicy.OneOfAll);
+    }
+    
     public bool CanPerform(Capability capability)
     {
         return Capabilities.Contains(capability);

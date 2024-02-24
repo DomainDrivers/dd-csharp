@@ -56,7 +56,7 @@ public class CapabilityFinder
     {
         return new AllocatableCapabilitiesSummary(
             from.Select(allocatableCapability => new AllocatableCapabilitySummary(allocatableCapability.Id,
-                    allocatableCapability.ResourceId, allocatableCapability.Capability, allocatableCapability.TimeSlot))
+                    allocatableCapability.ResourceId, allocatableCapability.Capabilities, allocatableCapability.TimeSlot))
                 .ToList());
     }
 }
