@@ -73,6 +73,29 @@ public class CapabilityAllocatingTest : IntegrationTest
     }
 
     [Fact]
+    public async Task CantAllocateWhenCapabilityHasNotBeenSchedule()
+    {
+        //given
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+        var skillJava = Capability.Skill("JAVA");
+        var demand = new Demand(skillJava, oneDay);
+        //and
+        var notScheduledCapability = AllocatableCapabilityId.NewOne();
+        //and
+        var projectId = ProjectAllocationsId.NewOne();
+        //and
+        await _allocationFacade.ScheduleProjectAllocationDemands(projectId, Demands.Of(demand));
+
+        //when
+        var result = await _allocationFacade.AllocateToProject(projectId, notScheduledCapability, skillJava, oneDay);
+
+        //then
+        Assert.False(result.HasValue);
+        var summary = await _allocationFacade.FindAllProjectsAllocations();
+        Assert.Empty(summary.ProjectAllocations[projectId].All);
+    }
+
+    [Fact]
     public async Task CanReleaseCapabilityFromProject()
     {
         //given
@@ -94,6 +117,7 @@ public class CapabilityAllocatingTest : IntegrationTest
         Assert.True(result);
         var summary = await _allocationFacade.FindAllProjectsAllocations();
         Assert.Empty(summary.ProjectAllocations[projectId].All);
+        Assert.True(await AvailabilityIsReleased(oneDay, allocatableCapabilityId, projectId));
     }
 
     private async Task<AllocatableCapabilityId> CreateAllocatableResource(TimeSlot period, Capability capability, AllocatableResourceId resourceId)
@@ -110,5 +134,11 @@ public class CapabilityAllocatingTest : IntegrationTest
         var calendars = await _availabilityFacade.LoadCalendars(new HashSet<ResourceId>() { resource }, period);
         return calendars.CalendarsDictionary.Values.All(calendar =>
             calendar.TakenBy(Owner.Of(projectId.Id)).SequenceEqual(new List<TimeSlot>() { period }));
+    }
+
+    private async Task<bool> AvailabilityIsReleased(TimeSlot oneDay, AllocatableCapabilityId allocatableCapabilityId,
+        ProjectAllocationsId projectId)
+    {
+        return !await AvailabilityWasBlocked(allocatableCapabilityId.ToAvailabilityResourceId(), oneDay, projectId);
     }
 }

@@ -9,14 +9,16 @@ public class AllocationFacade
 {
     private readonly IAllocationDbContext _allocationDbContext;
     private readonly AvailabilityFacade _availabilityFacade;
+    private readonly CapabilityFinder _capabilityFinder;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
     public AllocationFacade(IAllocationDbContext allocationDbContext, AvailabilityFacade availabilityFacade,
-        TimeProvider timeProvider, IUnitOfWork unitOfWork)
+        CapabilityFinder capabilityFinder, TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
         _allocationDbContext = allocationDbContext;
         _availabilityFacade = availabilityFacade;
+        _capabilityFinder = capabilityFinder;
         _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
@@ -45,18 +47,26 @@ public class AllocationFacade
         return ProjectsAllocationsSummary.Of(await _allocationDbContext.ProjectAllocations.ToListAsync());
     }
 
-    public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId, AllocatableCapabilityId resourceId,
+    public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId, AllocatableCapabilityId allocatableCapabilityId,
         Capability capability, TimeSlot timeSlot)
     {
         return await _unitOfWork.InTransaction<Guid?>(async () =>
         {
             //yes, one transaction crossing 2 modules.
-            if (!await _availabilityFacade.Block(resourceId.ToAvailabilityResourceId(), timeSlot, Owner.Of(projectId.Id)))
+            if (!await _capabilityFinder.IsPresent(allocatableCapabilityId))
             {
                 return null;
             }
+
+            if (!await _availabilityFacade.Block(allocatableCapabilityId.ToAvailabilityResourceId(), timeSlot,
+                    Owner.Of(projectId.Id)))
+            {
+                return null;
+            }
+
             var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
-            var @event = allocations.Allocate(resourceId, capability, timeSlot, _timeProvider.GetUtcNow().DateTime);
+            var @event = allocations.Allocate(allocatableCapabilityId, capability, timeSlot,
+                _timeProvider.GetUtcNow().DateTime);
             if (@event == null)
             {
                 return null;
@@ -70,7 +80,9 @@ public class AllocationFacade
     {
         return await _unitOfWork.InTransaction(async () =>
         {
-            //TODO WHAT TO DO WITH AVAILABILITY HERE?
+            //can release not scheduled capability - at least for now. Hence no check to capabilityFinder
+            await _availabilityFacade.Release(allocatableCapabilityId.ToAvailabilityResourceId(), timeSlot,
+                Owner.Of(projectId.Id));
             var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
             var @event = allocations.Release(allocatableCapabilityId, timeSlot, _timeProvider.GetUtcNow().DateTime);
             return @event != null;

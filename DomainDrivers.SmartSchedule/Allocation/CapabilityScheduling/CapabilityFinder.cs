@@ -59,4 +59,9 @@ public class CapabilityFinder
                     allocatableCapability.ResourceId, allocatableCapability.Capabilities, allocatableCapability.TimeSlot))
                 .ToList());
     }
+
+    public async Task<bool> IsPresent(AllocatableCapabilityId allocatableCapabilityId)
+    {
+        return await _allocatableResourceRepository.ExistsById(allocatableCapabilityId);
+    }
 }

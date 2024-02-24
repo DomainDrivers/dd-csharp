@@ -72,4 +72,9 @@ public class AllocatableCapabilityRepository
     {
         await _capabilitySchedulingDbContext.AllocatableCapabilities.AddRangeAsync(allocatableResources);
     }
+
+    public async Task<bool> ExistsById(AllocatableCapabilityId id)
+    {
+        return await _capabilitySchedulingDbContext.AllocatableCapabilities.AnyAsync(x => x.Id == id);
+    }
 }
