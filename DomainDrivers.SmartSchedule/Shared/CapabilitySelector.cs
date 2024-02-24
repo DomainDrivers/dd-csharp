@@ -1,6 +1,4 @@
-﻿using DomainDrivers.SmartSchedule.Shared;
-
-namespace DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
+﻿namespace DomainDrivers.SmartSchedule.Shared;
 
 public record CapabilitySelector(ISet<Capability> Capabilities, SelectingPolicy SelectingPolicy)
 {

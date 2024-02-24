@@ -1,7 +1,6 @@
-﻿using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
-using DomainDrivers.SmartSchedule.Shared;
+﻿using DomainDrivers.SmartSchedule.Shared;
 
-namespace DomainDrivers.SmartSchedule.Tests.Allocation.CapabilityScheduling;
+namespace DomainDrivers.SmartSchedule.Tests.Shared;
 
 public class CapabilitySelectorTest
 {

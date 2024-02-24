@@ -185,6 +185,35 @@ public class SimulationScenarios
         Assert.Equal(-9959d, buyingSlawek); //we pay 9999 and get the project for 40
         Assert.Equal(37d, buyingStaszek); //we pay 3 and get the project for 40
     }
+    
+    [Fact]
+    public void TakesIntoAccountSimulationsCapabilities() {
+        //given
+        var simulatedProjects =  SimulatedProjects()
+            .WithProject(Project1)
+            .ThatRequires(DemandFor(Skill("JAVA-MID"), Jan1))
+            .ThatCanEarn(9)
+            .WithProject(Project2)
+            .ThatRequires(DemandFor(Skill("JAVA-MID"), Jan1))
+            .ThatRequires(DemandFor(Skill("PYTHON"), Jan1))
+            .ThatCanEarn(99)
+            .Build();
+
+        //and there are
+        var simulatedAvailability = SimulatedCapabilities()
+            .WithEmployee(Staszek)
+            .ThatBringsSimultaneously(Skill("JAVA-MID"), Skill("PYTHON"))
+            .ThatIsAvailableAt(Jan1)
+            .Build();
+
+
+        //when
+        var result = _simulationFacade.WhatIsTheOptimalSetup(simulatedProjects, simulatedAvailability);
+
+        //then
+        Assert.Equal(99, result.Profit);
+        Assert.Single(result.ChosenItems);
+    }
 
     private static SimulatedProjectsBuilder SimulatedProjects()
     {

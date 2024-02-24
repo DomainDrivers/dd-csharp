@@ -7,14 +7,16 @@ public class AvailableCapabilitiesBuilder
 {
     private readonly IList<AvailableResourceCapability> _availabilities = new List<AvailableResourceCapability>();
     private Guid? _currentResourceId;
-    private Capability? _capability;
+    private ISet<Capability>? _capabilities;
     private TimeSlot? _timeSlot;
+    private SelectingPolicy _selectingPolicy;
 
     public AvailableCapabilitiesBuilder WithEmployee(Guid id)
     {
         if (_currentResourceId.HasValue)
         {
-            _availabilities.Add(new AvailableResourceCapability(_currentResourceId.Value, _capability!, _timeSlot!));
+            _availabilities.Add(new AvailableResourceCapability(_currentResourceId.Value,
+                new CapabilitySelector(_capabilities!, _selectingPolicy), _timeSlot!));
         }
 
         _currentResourceId = id;
@@ -23,7 +25,8 @@ public class AvailableCapabilitiesBuilder
 
     public AvailableCapabilitiesBuilder ThatBrings(Capability capability)
     {
-        _capability = capability;
+        _capabilities = new HashSet<Capability>() { capability };
+        _selectingPolicy = SelectingPolicy.OneOfAll;
         return this;
     }
 
@@ -37,9 +40,17 @@ public class AvailableCapabilitiesBuilder
     {
         if (_currentResourceId.HasValue)
         {
-            _availabilities.Add(new AvailableResourceCapability(_currentResourceId.Value, _capability!, _timeSlot!));
+            _availabilities.Add(new AvailableResourceCapability(_currentResourceId.Value,
+                new CapabilitySelector(_capabilities!, _selectingPolicy), _timeSlot!));
         }
 
         return new SimulatedCapabilities(_availabilities);
+    }
+    
+    public AvailableCapabilitiesBuilder ThatBringsSimultaneously(params Capability[] skills)
+    {
+        _capabilities = new HashSet<Capability>(skills);
+        _selectingPolicy = SelectingPolicy.AllSimultaneously;
+        return this;
     }
 }
