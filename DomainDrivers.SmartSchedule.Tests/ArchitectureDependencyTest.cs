@@ -41,6 +41,18 @@ public class ArchitectureDependencyTest
     private static readonly IObjectProvider<IType> CapabilitySchedulingLayer =
         Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling").As("CapabilityScheduling");
 
+    private static readonly IObjectProvider<IType> CapabilitySchedulingAclLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling.LegacyAcl").As("CapabilitySchedulingAcl");
+
+    private static readonly IObjectProvider<IType> ResourceLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Resource").As("Resource");
+
+    private static readonly IObjectProvider<IType> EmployeeLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Resource.Employee").As("Employee");
+
+    private static readonly IObjectProvider<IType> DeviceLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Resource.Device").As("Device");
+
     [Fact]
     public void CheckDependencies()
     {
@@ -97,6 +109,24 @@ public class ArchitectureDependencyTest
                 Types().That().AreNot(CapabilitySchedulingLayer)
                     .And().AreNot(SharedLayer)
                     .And().AreNot(AvailabilityLayer))
+            .Check(Architecture);
+        Types().That().Are(EmployeeLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(EmployeeLayer)
+                    .And().AreNot(SharedLayer)
+                    .And().AreNot(AllocationLayer))
+            .Check(Architecture);
+        Types().That().Are(DeviceLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(DeviceLayer)
+                    .And().AreNot(SharedLayer)
+                    .And().AreNot(AllocationLayer))
+            .Check(Architecture);
+        Types().That().Are(CapabilitySchedulingAclLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(CapabilitySchedulingAclLayer)
+                    .And().AreNot(SharedLayer)
+                    .And().AreNot(CapabilitySchedulingLayer))
             .Check(Architecture);
     }
 }
