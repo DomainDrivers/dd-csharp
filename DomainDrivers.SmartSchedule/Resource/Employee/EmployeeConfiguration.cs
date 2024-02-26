@@ -11,6 +11,7 @@ public static class EmployeeConfiguration
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
         serviceCollection.AddTransient<EmployeeRepository>();
         serviceCollection.AddTransient<EmployeeFacade>();
+        serviceCollection.AddTransient<ScheduleEmployeeCapabilities>();
         return serviceCollection;
     }
 }

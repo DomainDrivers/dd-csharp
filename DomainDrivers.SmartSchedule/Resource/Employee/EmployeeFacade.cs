@@ -1,15 +1,19 @@
-﻿using DomainDrivers.SmartSchedule.Shared;
+﻿using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
+using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Resource.Employee;
 
 public class EmployeeFacade
 {
     private readonly EmployeeRepository _employeeRepository;
+    private readonly ScheduleEmployeeCapabilities _scheduleEmployeeCapabilities;
     private readonly IUnitOfWork _unitOfWork;
 
-    public EmployeeFacade(EmployeeRepository employeeRepository, IUnitOfWork unitOfWork)
+    public EmployeeFacade(EmployeeRepository employeeRepository,
+        ScheduleEmployeeCapabilities scheduleEmployeeCapabilities, IUnitOfWork unitOfWork)
     {
         _employeeRepository = employeeRepository;
+        _scheduleEmployeeCapabilities = scheduleEmployeeCapabilities;
         _unitOfWork = unitOfWork;
     }
 
@@ -34,6 +38,11 @@ public class EmployeeFacade
             await _employeeRepository.Add(employee);
             return employeeId;
         });
+    }
+
+    public async Task<IList<AllocatableCapabilityId>> ScheduleCapabilities(EmployeeId employeeId, TimeSlot oneDay)
+    {
+        return await _scheduleEmployeeCapabilities.SetupEmployeeCapabilities(employeeId, oneDay);
     }
 
     //add vacation

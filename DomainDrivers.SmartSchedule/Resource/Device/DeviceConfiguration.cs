@@ -11,6 +11,7 @@ public static class DeviceConfiguration
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
         serviceCollection.AddTransient<DeviceRepository>();
         serviceCollection.AddTransient<DeviceFacade>();
+        serviceCollection.AddTransient<ScheduleDeviceCapabilities>();
         return serviceCollection;
     }
 }

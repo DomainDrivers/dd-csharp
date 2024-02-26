@@ -114,13 +114,13 @@ public class ArchitectureDependencyTest
             .Should().NotDependOnAny(
                 Types().That().AreNot(EmployeeLayer)
                     .And().AreNot(SharedLayer)
-                    .And().AreNot(AllocationLayer))
+                    .And().AreNot(CapabilitySchedulingLayer))
             .Check(Architecture);
         Types().That().Are(DeviceLayer)
             .Should().NotDependOnAny(
                 Types().That().AreNot(DeviceLayer)
                     .And().AreNot(SharedLayer)
-                    .And().AreNot(AllocationLayer))
+                    .And().AreNot(CapabilitySchedulingLayer))
             .Check(Architecture);
         Types().That().Are(CapabilitySchedulingAclLayer)
             .Should().NotDependOnAny(

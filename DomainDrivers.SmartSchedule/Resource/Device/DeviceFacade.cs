@@ -1,15 +1,19 @@
-﻿using DomainDrivers.SmartSchedule.Shared;
+﻿using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
+using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Resource.Device;
 
 public class DeviceFacade
 {
     private readonly DeviceRepository _deviceRepository;
+    private readonly ScheduleDeviceCapabilities _scheduleDeviceCapabilities;
     private readonly IUnitOfWork _unitOfWork;
 
-    public DeviceFacade(DeviceRepository deviceRepository, IUnitOfWork unitOfWork)
+    public DeviceFacade(DeviceRepository deviceRepository, ScheduleDeviceCapabilities scheduleDeviceCapabilities,
+        IUnitOfWork unitOfWork)
     {
         _deviceRepository = deviceRepository;
+        _scheduleDeviceCapabilities = scheduleDeviceCapabilities;
         _unitOfWork = unitOfWork;
     }
 
@@ -32,5 +36,10 @@ public class DeviceFacade
             await _deviceRepository.Add(device);
             return deviceId;
         });
+    }
+
+    public async Task<IList<AllocatableCapabilityId>> ScheduleCapabilities(DeviceId deviceId, TimeSlot oneDay)
+    {
+        return await _scheduleDeviceCapabilities.SetupDeviceCapabilities(deviceId, oneDay);
     }
 }
