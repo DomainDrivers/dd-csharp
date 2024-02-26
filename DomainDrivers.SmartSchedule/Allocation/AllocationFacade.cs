@@ -64,9 +64,7 @@ public class AllocationFacade
                 return null;
             }
 
-            var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
-            var @event = allocations.Allocate(allocatableCapabilityId, capability, timeSlot,
-                _timeProvider.GetUtcNow().DateTime);
+            var @event = await Allocate(projectId, allocatableCapabilityId, capability, timeSlot);
             if (@event == null)
             {
                 return null;
@@ -75,7 +73,15 @@ public class AllocationFacade
             return @event.AllocatedCapabilityId;
         });
     }
-    
+
+    private async Task<CapabilitiesAllocated?> Allocate(ProjectAllocationsId projectId,
+        AllocatableCapabilityId allocatableCapabilityId, Capability capability, TimeSlot timeSlot)
+    {
+        var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
+        var @event = allocations.Allocate(allocatableCapabilityId, capability, timeSlot, _timeProvider.GetUtcNow().DateTime);
+        return @event;
+    }
+
     public async Task<bool> ReleaseFromProject(ProjectAllocationsId projectId, AllocatableCapabilityId allocatableCapabilityId, TimeSlot timeSlot)
     {
         return await _unitOfWork.InTransaction(async () =>
@@ -88,7 +94,21 @@ public class AllocationFacade
             return @event != null;
         });
     }
-    
+
+    public Task<bool> AllocateCapabilityToProjectForPeriod(ProjectAllocationsId projectId, Capability capability,
+        TimeSlot timeSlot)
+    {
+        return Task.FromResult(false);
+    }
+
+    private AllocatableCapabilityId FindChosenAllocatableCapability(AllocatableCapabilitiesSummary proposedCapabilities,
+        ResourceId chosen)
+    {
+        return proposedCapabilities.All
+            .Select(x => x.Id)
+            .First(id => id.ToAvailabilityResourceId() == chosen);
+    }
+
     public async Task EditProjectDates(ProjectAllocationsId projectId, TimeSlot fromTo)
     {
         await _unitOfWork.InTransaction(async () =>

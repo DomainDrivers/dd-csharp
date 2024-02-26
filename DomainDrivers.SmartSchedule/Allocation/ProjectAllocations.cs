@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Shared;
 
@@ -6,13 +6,27 @@ namespace DomainDrivers.SmartSchedule.Allocation;
 
 public class ProjectAllocations
 {
+    private TimeSlot? _timeSlot;
     public ProjectAllocationsId ProjectId { get; private set; }
 
     public Allocations Allocations { get; private set; }
 
     public Demands Demands { get; private set; }
 
-    public TimeSlot? TimeSlot { get; private set; }
+    public TimeSlot? TimeSlot
+    {
+        get
+        {
+            return _timeSlot;
+        }
+        private set
+        {
+            //https://learn.microsoft.com/en-us/ef/core/modeling/owned-entities#by-design-restrictions
+            _timeSlot = value == null
+                ? null
+                : new TimeSlot(value.From, value.To);
+        }
+    }
 
     public ProjectAllocations(ProjectAllocationsId projectId, Allocations allocations, Demands scheduledDemands,
         TimeSlot timeSlot)
