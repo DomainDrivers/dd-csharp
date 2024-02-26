@@ -123,12 +123,12 @@ public class ResourceAvailabilityRepository
         return row.Map();
     }
 
-    public async Task<IList<ResourceAvailability>> LoadAvailabilitiesOfRandomResourceWithin(
-        ISet<ResourceAvailabilityId> resourceIds, TimeSlot normalized)
+    public async Task<ResourceGroupedAvailability> LoadAvailabilitiesOfRandomResourceWithin(
+        ISet<ResourceId> resourceIds, TimeSlot normalized)
     {
         var param = new
         {
-            Ids = resourceIds.Select(x => x.Id),
+            Ids = resourceIds.Select(x => x.Id!.Value).ToArray(),
             FromDate = normalized.From,
             ToDate = normalized.To
         };
@@ -152,7 +152,7 @@ public class ResourceAvailabilityRepository
              JOIN RandomResource r ON a.resource_id = r.resource_id
              """;
         var rows = await _dbConnection.QueryAsync<ResourceAvailabilityRow>(sql, param);
-        return rows.Select(x => x.Map()).ToList();
+        return new ResourceGroupedAvailability(rows.Select(x => x.Map()).ToList());
     }
 
     private record ResourceAvailabilityRow(

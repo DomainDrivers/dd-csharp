@@ -98,6 +98,25 @@ public class AvailabilityFacade
         });
     }
 
+    public async Task<ResourceId?> BlockRandomAvailable(ISet<ResourceId> resourceIds, TimeSlot within, Owner owner)
+    {
+        return await _unitOfWork.InTransaction(async () =>
+        {
+            var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());
+            var groupedAvailability =
+                await _availabilityRepository.LoadAvailabilitiesOfRandomResourceWithin(resourceIds, normalized);
+
+            if (await Block(owner, groupedAvailability))
+            {
+                return groupedAvailability.ResourceId;
+            }
+            else
+            {
+                return null;
+            }
+        });
+    }
+
     public async Task<ResourceGroupedAvailability> FindGrouped(ResourceId resourceId, TimeSlot within)
     {
         var normalized = Segments.NormalizeToSegmentBoundaries(within, DefaultSegment());

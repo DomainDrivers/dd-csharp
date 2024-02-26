@@ -95,10 +95,33 @@ public class AllocationFacade
         });
     }
 
-    public Task<bool> AllocateCapabilityToProjectForPeriod(ProjectAllocationsId projectId, Capability capability,
+    public async Task<bool> AllocateCapabilityToProjectForPeriod(ProjectAllocationsId projectId, Capability capability,
         TimeSlot timeSlot)
     {
-        return Task.FromResult(false);
+        return await _unitOfWork.InTransaction(async () =>
+        {
+            var proposedCapabilities = await _capabilityFinder.FindCapabilities(capability, timeSlot);
+
+            if (proposedCapabilities.All.Count == 0)
+            {
+                return false;
+            }
+
+            var availabilityResourceIds = proposedCapabilities.All
+                .Select(resource => resource.Id.ToAvailabilityResourceId())
+                .ToHashSet();
+            var chosen =
+                await _availabilityFacade.BlockRandomAvailable(availabilityResourceIds, timeSlot,
+                    Owner.Of(projectId.Id));
+
+            if (chosen == null)
+            {
+                return false;
+            }
+
+            var toAllocate = FindChosenAllocatableCapability(proposedCapabilities, chosen);
+            return await Allocate(projectId, toAllocate, capability, timeSlot) != null;
+        });
     }
 
     private AllocatableCapabilityId FindChosenAllocatableCapability(AllocatableCapabilitiesSummary proposedCapabilities,
