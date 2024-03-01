@@ -6,6 +6,8 @@ public static class SharedConfiguration
     {
         serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
         serviceCollection.AddTransient<TimeProvider>(_ => TimeProvider.System);
+        serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(SharedConfiguration).Assembly));
+        serviceCollection.AddScoped<IEventsPublisher, EventsPublisher>();
         return serviceCollection;
     }
 }
