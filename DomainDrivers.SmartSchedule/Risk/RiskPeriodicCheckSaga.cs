@@ -14,13 +14,13 @@ public class RiskPeriodicCheckSaga
     private int _version;
 
     public ProjectAllocationsId ProjectId { get; }
-    public Demands MissingDemands { get; }
-    public Earnings? Earnings { get; }
-    public DateTime? Deadline { get; }
+    public Demands MissingDemands { get; private set; }
+    public Earnings? Earnings { get; private set; }
+    public DateTime? Deadline { get; private set; }
 
     public bool AreDemandsSatisfied
     {
-        get { return false; }
+        get { return MissingDemands.All.Count == 0; }
     }
 
     public RiskPeriodicCheckSaga(ProjectAllocationsId projectId, Demands missingDemands)
@@ -42,38 +42,87 @@ public class RiskPeriodicCheckSaga
     private RiskPeriodicCheckSaga() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public RiskPeriodicCheckSagaStep? Handle(EarningsRecalculated @event)
+    public RiskPeriodicCheckSagaStep Handle(EarningsRecalculated @event)
     {
-        return default;
+        Earnings = @event.Earnings;
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
-    public RiskPeriodicCheckSagaStep? Handle(ProjectAllocationsDemandsScheduled @event)
+    public RiskPeriodicCheckSagaStep Handle(ProjectAllocationsDemandsScheduled @event)
     {
-        return default;
+        MissingDemands = @event.MissingDemands;
+
+        if (AreDemandsSatisfied)
+        {
+            return RiskPeriodicCheckSagaStep.NotifyAboutDemandsSatisfied;
+        }
+
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
-    public RiskPeriodicCheckSagaStep? Handle(ProjectAllocationScheduled @event)
+    public RiskPeriodicCheckSagaStep Handle(ProjectAllocationScheduled @event)
     {
-        return default;
+        Deadline = @event.FromTo.To;
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
-    public RiskPeriodicCheckSagaStep? Handle(ResourceTakenOver @event)
+    public RiskPeriodicCheckSagaStep Handle(ResourceTakenOver @event)
     {
-        return default;
+        if (@event.OccurredAt > Deadline)
+        {
+            return RiskPeriodicCheckSagaStep.DoNothing;
+        }
+
+        return RiskPeriodicCheckSagaStep.NotifyAboutPossibleRisk;
     }
 
-    public RiskPeriodicCheckSagaStep? Handle(CapabilityReleased @event)
+    public RiskPeriodicCheckSagaStep Handle(CapabilityReleased @event)
     {
-        return default;
+        MissingDemands = @event.MissingDemands;
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
-    public RiskPeriodicCheckSagaStep? Handle(CapabilitiesAllocated @event)
+    public RiskPeriodicCheckSagaStep Handle(CapabilitiesAllocated @event)
     {
-        return default;
+        MissingDemands = @event.MissingDemands;
+
+        if (AreDemandsSatisfied)
+        {
+            return RiskPeriodicCheckSagaStep.NotifyAboutDemandsSatisfied;
+        }
+
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
-    public RiskPeriodicCheckSagaStep? HandleWeeklyCheck(DateTime when)
+    public RiskPeriodicCheckSagaStep HandleWeeklyCheck(DateTime when)
     {
-        return default;
+        if (Deadline == null || when > Deadline)
+        {
+            return RiskPeriodicCheckSagaStep.DoNothing;
+        }
+
+        if (AreDemandsSatisfied)
+        {
+            return RiskPeriodicCheckSagaStep.DoNothing;
+        }
+
+        var daysToDeadline = (Deadline.Value - when).TotalDays;
+
+        if (daysToDeadline > UpcomingDeadlineAvailabilitySearch)
+        {
+            return RiskPeriodicCheckSagaStep.DoNothing;
+        }
+
+        if (daysToDeadline > UpcomingDeadlineReplacementSuggestion)
+        {
+            return RiskPeriodicCheckSagaStep.FindAvailable;
+        }
+
+        if (Earnings!.GreaterThan(RiskThresholdValue))
+        {
+            return RiskPeriodicCheckSagaStep.SuggestReplacement;
+        }
+
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 }
