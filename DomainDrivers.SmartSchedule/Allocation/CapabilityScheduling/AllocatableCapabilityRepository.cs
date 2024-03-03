@@ -67,6 +67,12 @@ public class AllocatableCapabilityRepository
             .Where(x => allocatableCapabilityIds.Contains(x.Id))
             .ToListAsync();
     }
+    
+    public async Task<AllocatableCapability?> FindById(AllocatableCapabilityId allocatableCapabilityId)
+    {
+        return await _capabilitySchedulingDbContext.AllocatableCapabilities
+            .FindAsync(allocatableCapabilityId);
+    }
 
     public async Task SaveAll(IList<AllocatableCapability> allocatableResources)
     {

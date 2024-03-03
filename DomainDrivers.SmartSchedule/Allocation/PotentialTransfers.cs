@@ -1,4 +1,5 @@
-﻿using DomainDrivers.SmartSchedule.Allocation.Cashflow;
+﻿using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
+using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
 
@@ -47,6 +48,23 @@ public record PotentialTransfers(
                 .All
                 .Select(demand => new DomainDrivers.SmartSchedule.Simulation.Demand(demand.Capability, demand.Slot))
                 .ToList());
+    }
+    
+    public PotentialTransfers Transfer(ProjectAllocationsId projectTo, AllocatableCapabilitySummary capabilityToTransfer, TimeSlot forSlot)
+    {
+        var projectToMoveFrom = FindProjectToMoveFrom(capabilityToTransfer.Id, forSlot);
+        if (projectToMoveFrom != null)
+        {
+            return Transfer(projectToMoveFrom, projectTo, new AllocatedCapability(capabilityToTransfer.Id, capabilityToTransfer.Capabilities, capabilityToTransfer.TimeSlot), forSlot);
+        }
+        return this;
+    }
+
+    private ProjectAllocationsId? FindProjectToMoveFrom(AllocatableCapabilityId cap, TimeSlot inSlot)
+    {
+        return Summary.ProjectAllocations
+            .FirstOrDefault(entry => entry.Value.Find(cap) != null)
+            .Key;
     }
 
     public virtual bool Equals(PotentialTransfers? other)

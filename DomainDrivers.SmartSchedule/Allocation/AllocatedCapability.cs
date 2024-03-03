@@ -5,7 +5,7 @@ using DomainDrivers.SmartSchedule.Shared;
 namespace DomainDrivers.SmartSchedule.Allocation;
 
 [method: JsonConstructor]
-public record AllocatedCapability(AllocatableCapabilityId AllocatedCapabilityId, Capability Capability, TimeSlot TimeSlot)
+public record AllocatedCapability(AllocatableCapabilityId AllocatedCapabilityId, CapabilitySelector Capability, TimeSlot TimeSlot)
 {
     public virtual bool Equals(AllocatedCapability? other)
     {

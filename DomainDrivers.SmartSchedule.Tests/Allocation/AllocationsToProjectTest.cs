@@ -23,7 +23,7 @@ public class AllocationsToProjectTest
         var allocations = ProjectAllocations.Empty(ProjectId);
 
         //when
-        var @event = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        var @event = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
 
         //then
         Assert.NotNull(@event);
@@ -39,7 +39,7 @@ public class AllocationsToProjectTest
         var allocations = new ProjectAllocations(ProjectId, Allocations.None(), Demands.None(), January);
 
         //when
-        var @event = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        var @event = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
 
         //then
         Assert.Null(@event);
@@ -52,10 +52,10 @@ public class AllocationsToProjectTest
         var allocations = ProjectAllocations.Empty(ProjectId);
 
         //and
-        allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
 
         //when
-        var @event = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        var @event = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
 
         //then
         Assert.Null(@event);
@@ -65,13 +65,13 @@ public class AllocationsToProjectTest
     public void ThereAreNoMissingDemandsWhenAllAllocated()
     {
         //given
-        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Capability.Skill("JAVA"), Feb1));
+        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Skill("JAVA"), Feb1));
         //and
         var allocations = ProjectAllocations.WithDemands(ProjectId, demands);
         //and
-        allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
         //when
-        var @event = allocations.Allocate(AdminId, Capability.Skill("JAVA"), Feb1, When);
+        var @event = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Skill("JAVA")), Feb1, When);
         //then
         Assert.NotNull(@event);
         Assert.Equal(
@@ -83,18 +83,18 @@ public class AllocationsToProjectTest
     public void MissingDemandsArePresentWhenAllocatingForDifferentThanDemandedSlot()
     {
         //given
-        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Capability.Skill("JAVA"), Feb1));
+        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Skill("JAVA"), Feb1));
         //and
         var allocations = ProjectAllocations.WithDemands(ProjectId, demands);
         //and
-        allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
         //when
-        var @event = allocations.Allocate(AdminId, Capability.Skill("JAVA"), Feb2, When);
+        var @event = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Skill("JAVA")), Feb2, When);
         //then
         Assert.NotNull(@event);
-        Assert.Equal(Demands.Of(new Demand(Capability.Skill("JAVA"), Feb1)), allocations.MissingDemands());
+        Assert.Equal(Demands.Of(new Demand(Skill("JAVA"), Feb1)), allocations.MissingDemands());
         Assert.Equal(new CapabilitiesAllocated(@event.EventId, @event.AllocatedCapabilityId, ProjectId,
-            Demands.Of(new Demand(Capability.Skill("JAVA"), Feb1)), When), @event);
+            Demands.Of(new Demand(Skill("JAVA"), Feb1)), When), @event);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class AllocationsToProjectTest
         //given
         var allocations = ProjectAllocations.Empty(ProjectId);
         //and
-        var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        var allocatedAdmin = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
         //when
         var adminId = new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId);
         var @event = allocations.Release(adminId, Feb1, When);
@@ -130,12 +130,12 @@ public class AllocationsToProjectTest
     public void MissingDemandsArePresentAfterReleasingSomeOfAllocatedCapabilities()
     {
         //given
-        var demandForJava = new Demand(Capability.Skill("JAVA"), Feb1);
+        var demandForJava = new Demand(Skill("JAVA"), Feb1);
         var demandForAdmin = new Demand(Permission("ADMIN"), Feb1);
         var allocations = ProjectAllocations.WithDemands(ProjectId, Demands.Of(demandForAdmin, demandForJava));
         //and
-        var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
-        allocations.Allocate(AllocatableCapabilityId.NewOne(), Capability.Skill("JAVA"), Feb1, When);
+        var allocatedAdmin = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
+        allocations.Allocate(AllocatableCapabilityId.NewOne(),CapabilitySelector.CanJustPerform(Skill("JAVA")), Feb1, When);
         //when
         var @event = allocations.Release(new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId), Feb1, When);
 
@@ -150,7 +150,7 @@ public class AllocationsToProjectTest
         //given
         var allocations = ProjectAllocations.Empty(ProjectId);
         //and
-        var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        var allocatedAdmin = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
 
         //when
         var @event = allocations.Release(new AllocatableCapabilityId(allocatedAdmin!.AllocatedCapabilityId), Feb2, When);
@@ -165,7 +165,7 @@ public class AllocationsToProjectTest
         //given
         var allocations = ProjectAllocations.Empty(ProjectId);
         //and
-        var allocatedAdmin = allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        var allocatedAdmin = allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
 
         //when
         var fifteenMinutesIn1Feb = new TimeSlot(Feb1.From.AddHours(1), Feb1.From.AddHours(2));
@@ -179,8 +179,8 @@ public class AllocationsToProjectTest
         Assert.Equal(new CapabilityReleased(@event!.EventId, ProjectId, Demands.None(), When), @event);
         CollectionAssert.AreEquivalent(new List<AllocatedCapability>
         {
-            new AllocatedCapability(AdminId, Permission("ADMIN"), oneHourBefore),
-            new AllocatedCapability(AdminId, Permission("ADMIN"), theRest)
+            new AllocatedCapability(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), oneHourBefore),
+            new AllocatedCapability(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), theRest)
         }, allocations.Allocations.All);
     }
 
@@ -188,19 +188,19 @@ public class AllocationsToProjectTest
     public void CanChangeDemands()
     {
         //given
-        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Capability.Skill("JAVA"), Feb1));
+        var demands = Demands.Of(new Demand(Permission("ADMIN"), Feb1), new Demand(Skill("JAVA"), Feb1));
         //and
         var allocations = ProjectAllocations.WithDemands(ProjectId, demands);
         //and
-        allocations.Allocate(AdminId, Permission("ADMIN"), Feb1, When);
+        allocations.Allocate(AdminId, CapabilitySelector.CanJustPerform(Permission("ADMIN")), Feb1, When);
         //when
-        var @event = allocations.AddDemands(Demands.Of(new Demand(Capability.Skill("PYTHON"), Feb1)), When);
+        var @event = allocations.AddDemands(Demands.Of(new Demand(Skill("PYTHON"), Feb1)), When);
         //then
-        Assert.Equal(Demands.AllInSameTimeSlot(Feb1, Capability.Skill("JAVA"), Capability.Skill("PYTHON")),
+        Assert.Equal(Demands.AllInSameTimeSlot(Feb1, Skill("JAVA"), Skill("PYTHON")),
             allocations.MissingDemands());
         Assert.Equal(new ProjectAllocationsDemandsScheduled(@event!.Uuid, ProjectId, Demands.AllInSameTimeSlot(
-            Feb1, Capability.Skill("JAVA"),
-            Capability.Skill("PYTHON")), When), @event);
+            Feb1, Skill("JAVA"),
+            Skill("PYTHON")), When), @event);
     }
 
     [Fact]

@@ -38,6 +38,18 @@ public class CapabilityFinder
         return CreateSummary(allByIdIn);
     }
 
+    public async Task<AllocatableCapabilitySummary?> FindById(AllocatableCapabilityId allocatableCapabilityId)
+    {
+        var allocatableCapability = await _allocatableResourceRepository.FindById(allocatableCapabilityId);
+        
+        if (allocatableCapability == null)
+        {
+            return null;
+        }
+
+        return CreateSummary(allocatableCapability);
+    }
+
     private async Task<IList<AllocatableCapability>> FilterAvailabilityInTimeSlot(
         IList<AllocatableCapability> findAllocatableCapability, TimeSlot timeSlot)
     {
@@ -54,14 +66,13 @@ public class CapabilityFinder
 
     private AllocatableCapabilitiesSummary CreateSummary(IList<AllocatableCapability> from)
     {
-        return new AllocatableCapabilitiesSummary(
-            from.Select(allocatableCapability => new AllocatableCapabilitySummary(allocatableCapability.Id,
-                    allocatableCapability.ResourceId, allocatableCapability.Capabilities, allocatableCapability.TimeSlot))
-                .ToList());
+        return new AllocatableCapabilitiesSummary(from
+            .Select(allocatableCapability => CreateSummary(allocatableCapability)).ToList());
     }
 
-    public async Task<bool> IsPresent(AllocatableCapabilityId allocatableCapabilityId)
+    private AllocatableCapabilitySummary CreateSummary(AllocatableCapability allocatableCapability)
     {
-        return await _allocatableResourceRepository.ExistsById(allocatableCapabilityId);
+        return new AllocatableCapabilitySummary(allocatableCapability.Id, allocatableCapability.ResourceId,
+            allocatableCapability.Capabilities, allocatableCapability.TimeSlot);
     }
 }

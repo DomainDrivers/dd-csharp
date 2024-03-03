@@ -26,7 +26,7 @@ public record Demands(IList<Demand> All)
 
     private static bool SatisfiedBy(Demand d, Allocations allocations)
     {
-        return allocations.All.Any(ar => ar.Capability == d.Capability && d.Slot.Within(ar.TimeSlot));
+        return allocations.All.Any(ar => ar.Capability.CanPerform(d.Capability) && d.Slot.Within(ar.TimeSlot));
     }
     
     public Demands WithNew(Demands newDemands) {

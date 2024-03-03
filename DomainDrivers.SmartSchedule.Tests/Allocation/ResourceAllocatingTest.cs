@@ -34,13 +34,13 @@ public class ResourceAllocatingTest : IntegrationTest
         await _allocationFacade.ScheduleProjectAllocationDemands(projectId, Demands.Of(demand));
 
         //when
-        var result = await _allocationFacade.AllocateToProject(projectId, allocatableCapabilityId, skillJava, oneDay);
+        var result = await _allocationFacade.AllocateToProject(projectId, allocatableCapabilityId, oneDay);
 
         //then
         Assert.True(result.HasValue);
         var summary = await _allocationFacade.FindAllProjectsAllocations();
         Assert.Equal(
-            new HashSet<AllocatedCapability>() { new AllocatedCapability(allocatableCapabilityId, skillJava, oneDay) },
+            new HashSet<AllocatedCapability>() { new AllocatedCapability(allocatableCapabilityId, CapabilitySelector.CanJustPerform(skillJava), oneDay) },
             summary.ProjectAllocations[projectId].All);
         Assert.Equal(new List<Demand>() { demand }, summary.Demands[projectId].All);
         Assert.True(await AvailabilityWasBlocked(allocatableCapabilityId.ToAvailabilityResourceId(), oneDay, projectId));
@@ -63,7 +63,7 @@ public class ResourceAllocatingTest : IntegrationTest
         await _allocationFacade.ScheduleProjectAllocationDemands(projectId, Demands.Of(demand));
 
         //when
-        var result = await _allocationFacade.AllocateToProject(projectId, allocatableCapabilityId, skillJava, oneDay);
+        var result = await _allocationFacade.AllocateToProject(projectId, allocatableCapabilityId, oneDay);
 
         //then
         Assert.False(result.HasValue);
@@ -86,7 +86,7 @@ public class ResourceAllocatingTest : IntegrationTest
         await _allocationFacade.ScheduleProjectAllocationDemands(projectId, Demands.Of(demand));
 
         //when
-        var result = await _allocationFacade.AllocateToProject(projectId, notScheduledCapability, skillJava, oneDay);
+        var result = await _allocationFacade.AllocateToProject(projectId, notScheduledCapability, oneDay);
 
         //then
         Assert.False(result.HasValue);
@@ -106,8 +106,7 @@ public class ResourceAllocatingTest : IntegrationTest
         //and
         await _allocationFacade.ScheduleProjectAllocationDemands(projectId, Demands.None());
         //and
-        var chosenCapability = Capability.Skill("JAVA");
-        await _allocationFacade.AllocateToProject(projectId, allocatableCapabilityId, chosenCapability, oneDay);
+        await _allocationFacade.AllocateToProject(projectId, allocatableCapabilityId, oneDay);
 
         //when
         var result = await _allocationFacade.ReleaseFromProject(projectId, allocatableCapabilityId, oneDay);

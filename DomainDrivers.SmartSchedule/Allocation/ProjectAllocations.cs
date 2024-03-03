@@ -54,7 +54,7 @@ public class ProjectAllocations
         Demands = demands;
     }
 
-    public CapabilitiesAllocated? Allocate(AllocatableCapabilityId allocatableCapabilityId, Capability capability,
+    public CapabilitiesAllocated? Allocate(AllocatableCapabilityId allocatableCapabilityId, CapabilitySelector capability,
         TimeSlot requestedSlot, DateTime when)
     {
         var allocatedCapability = new AllocatedCapability(allocatableCapabilityId, capability, requestedSlot);

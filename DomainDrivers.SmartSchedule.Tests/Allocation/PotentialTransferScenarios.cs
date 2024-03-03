@@ -28,7 +28,7 @@ public class PotentialTransferScenarios
     private static readonly ProjectAllocationsId InsuranceSoftId = ProjectAllocationsId.NewOne();
 
     private static readonly AllocatedCapability StaszekJavaMid =
-        new AllocatedCapability(AllocatableCapabilityId.NewOne(), Skill("JAVA-MID"), Jan1);
+        new AllocatedCapability(AllocatableCapabilityId.NewOne(), CapabilitySelector.CanJustPerform(Skill("JAVA-MID")), Jan1);
 
     private readonly PotentialTransfersService _potentialTransfers =
         new PotentialTransfersService(new SimulationFacade(new OptimizationFacade()));

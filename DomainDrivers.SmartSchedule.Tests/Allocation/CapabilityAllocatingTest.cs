@@ -81,8 +81,8 @@ public class CapabilityAllocatingTest : IntegrationTest
         var project2 =
             await _allocationFacade.CreateAllocation(oneDay, Demands.Of(new Demand(Skill("DEBUGGING"), oneDay)));
         //and
-        await _allocationFacade.AllocateToProject(project1, allocatableCapabilityId1, Skill("DEBUGGING"), oneDay);
-        await _allocationFacade.AllocateToProject(project2, allocatableCapabilityId2, Skill("DEBUGGING"), oneDay);
+        await _allocationFacade.AllocateToProject(project1, allocatableCapabilityId1, oneDay);
+        await _allocationFacade.AllocateToProject(project2, allocatableCapabilityId2, oneDay);
 
         //and
         var projectId = ProjectAllocationsId.NewOne();

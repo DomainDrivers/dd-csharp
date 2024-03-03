@@ -51,13 +51,14 @@ public class AllocationFacade
         return ProjectsAllocationsSummary.Of(await _allocationDbContext.ProjectAllocations.ToListAsync());
     }
 
-    public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId, AllocatableCapabilityId allocatableCapabilityId,
-        Capability capability, TimeSlot timeSlot)
+    public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId,
+        AllocatableCapabilityId allocatableCapabilityId, TimeSlot timeSlot)
     {
         return await _unitOfWork.InTransaction<Guid?>(async () =>
         {
             //yes, one transaction crossing 2 modules.
-            if (!await _capabilityFinder.IsPresent(allocatableCapabilityId))
+            var capability = await _capabilityFinder.FindById(allocatableCapabilityId);
+            if (capability == null)
             {
                 return null;
             }
@@ -68,7 +69,7 @@ public class AllocationFacade
                 return null;
             }
 
-            var @event = await Allocate(projectId, allocatableCapabilityId, capability, timeSlot);
+            var @event = await Allocate(projectId, allocatableCapabilityId, capability.Capabilities, timeSlot);
             if (@event == null)
             {
                 return null;
@@ -79,14 +80,16 @@ public class AllocationFacade
     }
 
     private async Task<CapabilitiesAllocated?> Allocate(ProjectAllocationsId projectId,
-        AllocatableCapabilityId allocatableCapabilityId, Capability capability, TimeSlot timeSlot)
+        AllocatableCapabilityId allocatableCapabilityId, CapabilitySelector capability, TimeSlot timeSlot)
     {
         var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
-        var @event = allocations.Allocate(allocatableCapabilityId, capability, timeSlot, _timeProvider.GetUtcNow().DateTime);
+        var @event = allocations.Allocate(allocatableCapabilityId, capability, timeSlot,
+            _timeProvider.GetUtcNow().DateTime);
         return @event;
     }
 
-    public async Task<bool> ReleaseFromProject(ProjectAllocationsId projectId, AllocatableCapabilityId allocatableCapabilityId, TimeSlot timeSlot)
+    public async Task<bool> ReleaseFromProject(ProjectAllocationsId projectId,
+        AllocatableCapabilityId allocatableCapabilityId, TimeSlot timeSlot)
     {
         return await _unitOfWork.InTransaction(async () =>
         {
@@ -124,16 +127,15 @@ public class AllocationFacade
             }
 
             var toAllocate = FindChosenAllocatableCapability(proposedCapabilities, chosen);
-            return await Allocate(projectId, toAllocate, capability, timeSlot) != null;
+            return await Allocate(projectId, toAllocate.Id, toAllocate.Capabilities, timeSlot) != null;
         });
     }
 
-    private AllocatableCapabilityId FindChosenAllocatableCapability(AllocatableCapabilitiesSummary proposedCapabilities,
+    private AllocatableCapabilitySummary FindChosenAllocatableCapability(AllocatableCapabilitiesSummary proposedCapabilities,
         ResourceId chosen)
     {
         return proposedCapabilities.All
-            .Select(x => x.Id)
-            .First(id => id.ToAvailabilityResourceId() == chosen);
+            .First(summary => summary.Id.ToAvailabilityResourceId() == chosen);
     }
 
     public async Task EditProjectDates(ProjectAllocationsId projectId, TimeSlot fromTo)
@@ -147,7 +149,7 @@ public class AllocationFacade
                 _timeProvider.GetUtcNow().DateTime));
         });
     }
-    
+
     public async Task ScheduleProjectAllocationDemands(ProjectAllocationsId projectId, Demands demands)
     {
         await _unitOfWork.InTransaction(async () =>
