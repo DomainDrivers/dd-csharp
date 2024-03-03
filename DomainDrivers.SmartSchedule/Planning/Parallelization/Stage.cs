@@ -1,7 +1,9 @@
-﻿using DomainDrivers.SmartSchedule.Availability;
+using System.Text.Json.Serialization;
+using DomainDrivers.SmartSchedule.Availability;
 
 namespace DomainDrivers.SmartSchedule.Planning.Parallelization;
 
+[method: JsonConstructor]
 public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceId> Resources, TimeSpan Duration)
 {
     public Stage OfDuration(TimeSpan duration)

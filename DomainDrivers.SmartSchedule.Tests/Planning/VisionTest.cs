@@ -8,7 +8,7 @@ using static DomainDrivers.SmartSchedule.Tests.Planning.Scheduling.Assertions.Sc
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning;
 
-public class VisionTest : IntegrationTest
+public class VisionTest : IntegrationTestWithSharedApp
 {
     static readonly DateTime Jan1 = DateTime.Parse("2020-01-01T00:00:00.00Z");
 

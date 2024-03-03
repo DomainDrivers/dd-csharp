@@ -3,7 +3,7 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
-public class TakingRandomResourceTest : IntegrationTest
+public class TakingRandomResourceTest : IntegrationTestWithSharedApp
 {
     private readonly AvailabilityFacade _availabilityFacade;
 

@@ -5,7 +5,7 @@ using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
-public class CreatingNewProjectTest : IntegrationTest
+public class CreatingNewProjectTest : IntegrationTestWithSharedApp
 {
     static TimeSlot Jan = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
     static TimeSlot Feb = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 2, 1);

@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
-public class ResourceAvailabilityUniquenessTest : IntegrationTest
+public class ResourceAvailabilityUniquenessTest : IntegrationTestWithSharedApp
 {
     static readonly TimeSlot OneMonth = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
 

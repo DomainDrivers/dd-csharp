@@ -5,7 +5,7 @@ using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
-public class DemandSchedulingTest : IntegrationTest
+public class DemandSchedulingTest : IntegrationTestWithSharedApp
 {
     static readonly Demand Java = new Demand(Capability.Skill("JAVA"), TimeSlot.CreateDailyTimeSlotAtUtc(2022, 2, 2));
 

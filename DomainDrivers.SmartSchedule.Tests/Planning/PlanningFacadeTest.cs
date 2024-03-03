@@ -12,7 +12,7 @@ using static DomainDrivers.SmartSchedule.Shared.Capability;
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning;
 
-public class PlanningFacadeTest : IntegrationTest
+public class PlanningFacadeTest : IntegrationTestWithSharedApp
 {
     private readonly PlanningFacade _projectFacade;
     private readonly IEventsPublisher _eventsPublisher;

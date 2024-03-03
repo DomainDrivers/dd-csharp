@@ -6,7 +6,7 @@ using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation.Cashflow;
 
-public class CashFlowFacadeTest : IntegrationTest
+public class CashFlowFacadeTest : IntegrationTestWithSharedApp
 {
     private readonly CashFlowFacade _cashFlowFacade;
     private readonly IEventsPublisher _eventsPublisher;

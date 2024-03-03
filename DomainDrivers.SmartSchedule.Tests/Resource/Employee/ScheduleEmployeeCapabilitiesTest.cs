@@ -4,7 +4,7 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Resource.Employee;
 
-public class ScheduleEmployeeCapabilitiesTest : IntegrationTest
+public class ScheduleEmployeeCapabilitiesTest : IntegrationTestWithSharedApp
 {
     private readonly CapabilityFinder _capabilityFinder;
     private readonly EmployeeFacade _employeeFacade;

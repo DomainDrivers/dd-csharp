@@ -11,6 +11,7 @@ public static class AllocationConfiguration
         serviceCollection.AddScoped<IAllocationDbContext>(
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
         serviceCollection.AddTransient<AllocationFacade>();
+        serviceCollection.AddTransient<PotentialTransfersService>();
         return serviceCollection;
     }
 }

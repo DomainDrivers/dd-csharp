@@ -4,7 +4,7 @@ using static DomainDrivers.SmartSchedule.Resource.Employee.Seniority;
 
 namespace DomainDrivers.SmartSchedule.Tests.Resource.Employee;
 
-public class CreatingEmployeeTest : IntegrationTest
+public class CreatingEmployeeTest : IntegrationTestWithSharedApp
 {
     private readonly EmployeeFacade _employeeFacade;
 

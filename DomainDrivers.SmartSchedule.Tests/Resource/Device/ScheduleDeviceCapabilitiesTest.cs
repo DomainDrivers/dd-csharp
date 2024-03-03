@@ -4,7 +4,7 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Resource.Device;
 
-public class ScheduleDeviceCapabilitiesTest : IntegrationTest
+public class ScheduleDeviceCapabilitiesTest : IntegrationTestWithSharedApp
 {
     private readonly DeviceFacade _deviceFacade;
     private readonly CapabilityFinder _capabilityFinder;

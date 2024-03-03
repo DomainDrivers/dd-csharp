@@ -156,6 +156,13 @@ public class PlanningFacade
             .ToList();
     }
 
+    public async Task<IList<ProjectCard>> LoadAll()
+    {
+        return (await _planningDbContext.Projects.ToListAsync())
+            .Select(project => ToSummary(project))
+            .ToList();
+    }
+
     private ProjectCard ToSummary(Project project)
     {
         return new ProjectCard(project.Id, project.Name, project.ParallelizedStages, project.AllDemands,

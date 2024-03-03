@@ -31,7 +31,7 @@ public class PotentialTransferScenarios
         new AllocatedCapability(AllocatableCapabilityId.NewOne(), CapabilitySelector.CanJustPerform(Skill("JAVA-MID")), Jan1);
 
     private readonly PotentialTransfersService _potentialTransfers =
-        new PotentialTransfersService(new SimulationFacade(new OptimizationFacade()));
+        new PotentialTransfersService(new SimulationFacade(new OptimizationFacade()), null!, null!);
 
     [Fact]
     public void SimulatesMovingCapabilitiesToDifferentProject()

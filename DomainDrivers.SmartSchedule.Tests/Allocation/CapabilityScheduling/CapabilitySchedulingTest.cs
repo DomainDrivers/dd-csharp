@@ -4,7 +4,7 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation.CapabilityScheduling;
 
-public class CapabilitySchedulingTest : IntegrationTest
+public class CapabilitySchedulingTest : IntegrationTestWithSharedApp
 {
     private readonly CapabilityScheduler _capabilityScheduler;
     private readonly CapabilityFinder _capabilityFinder;

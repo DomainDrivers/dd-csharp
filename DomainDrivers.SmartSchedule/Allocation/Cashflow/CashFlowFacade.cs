@@ -41,4 +41,10 @@ public class CashFlowFacade
         var byId = await _cashflowDbContext.Cashflows.SingleAsync(x => x.ProjectId == projectId);
         return byId.Earnings();
     }
+
+    public async Task<IDictionary<ProjectAllocationsId, Earnings>> FindAllEarnings()
+    {
+        return (await _cashflowDbContext.Cashflows.ToListAsync())
+            .ToDictionary(x => x.ProjectId, x => x.Earnings());
+    }
 }

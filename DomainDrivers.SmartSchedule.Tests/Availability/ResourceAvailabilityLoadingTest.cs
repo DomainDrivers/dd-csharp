@@ -3,7 +3,7 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
-public class ResourceAvailabilityLoadingTest : IntegrationTest
+public class ResourceAvailabilityLoadingTest : IntegrationTestWithSharedApp
 {
     private static readonly TimeSlot OneMonth = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
     private readonly ResourceAvailabilityRepository _resourceAvailabilityRepository;

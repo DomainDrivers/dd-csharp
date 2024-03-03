@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Testcontainers.PostgreSql;
 
@@ -13,11 +14,23 @@ namespace DomainDrivers.SmartSchedule.Tests;
 [CollectionDefinition(nameof(SharedIntegrationTestAppCollection))]
 public class SharedIntegrationTestAppCollection : ICollectionFixture<IntegrationTestApp>;
 
-public class IntegrationTestApp : WebApplicationFactory<Program>, IAsyncLifetime
+public class IntegrationTestApp : IntegrationTestAppBase
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureTestServices(services =>
+        {
+            services.Replace(ServiceDescriptor.Scoped<IEventsPublisher>(_ => Substitute.For<IEventsPublisher>()));
+        });
+        base.ConfigureWebHost(builder);
+    }
+}
+
+public class IntegrationTestAppBase : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgresFixture _postgres;
 
-    public IntegrationTestApp()
+    public IntegrationTestAppBase()
     {
         _postgres = new PostgresFixture();
     }
@@ -33,7 +46,9 @@ public class IntegrationTestApp : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseConfiguration(config);
         builder.ConfigureTestServices(services =>
         {
-            services.Replace(ServiceDescriptor.Scoped<IEventsPublisher>(_ => Substitute.For<IEventsPublisher>()));
+            // Hosted services are not needed in integration tests and Quartz's one caused problems
+            // https://github.com/quartznet/quartznet/issues/1136
+            services.RemoveAll<IHostedService>();
         });
         base.ConfigureWebHost(builder);
     }

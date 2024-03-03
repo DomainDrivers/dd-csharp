@@ -8,7 +8,7 @@ using static DomainDrivers.SmartSchedule.Tests.Planning.Scheduling.Assertions.Sc
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning;
 
-public class StandardWaterfallTest : IntegrationTest
+public class StandardWaterfallTest : IntegrationTestWithSharedApp
 {
     static readonly DateTime Jan1 = DateTime.Parse("2020-01-01T00:00:00.00Z");
     static readonly ResourceId Resource1 = ResourceId.NewOne();

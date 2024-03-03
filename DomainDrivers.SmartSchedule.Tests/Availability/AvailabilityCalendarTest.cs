@@ -4,7 +4,7 @@ using NUnit.Framework.Legacy;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
-public class AvailabilityCalendarTest : IntegrationTest
+public class AvailabilityCalendarTest : IntegrationTestWithSharedApp
 {
     private readonly AvailabilityFacade _availabilityFacade;
 

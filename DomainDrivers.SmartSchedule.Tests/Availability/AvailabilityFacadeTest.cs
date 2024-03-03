@@ -5,7 +5,7 @@ using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
-public class AvailabilityFacadeTest : IntegrationTest
+public class AvailabilityFacadeTest : IntegrationTestWithSharedApp
 {
     private readonly AvailabilityFacade _availabilityFacade;
     private readonly IEventsPublisher _eventsPublisher;

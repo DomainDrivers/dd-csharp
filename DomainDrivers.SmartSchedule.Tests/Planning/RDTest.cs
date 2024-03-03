@@ -6,7 +6,7 @@ using static DomainDrivers.SmartSchedule.Tests.Planning.Scheduling.Assertions.Sc
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning;
 
-public class RDTest : IntegrationTest
+public class RDTest : IntegrationTestWithSharedApp
 {
     static readonly TimeSlot January = new TimeSlot(DateTime.Parse("2020-01-01T00:00:00.00Z"),
         DateTime.Parse("2020-01-31T00:00:00.00Z"));

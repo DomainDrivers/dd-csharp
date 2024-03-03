@@ -7,7 +7,7 @@ using static DomainDrivers.SmartSchedule.Shared.Capability;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
-public class CapabilityAllocatingTest : IntegrationTest
+public class CapabilityAllocatingTest : IntegrationTestWithSharedApp
 {
     private static readonly AllocatableResourceId AllocatableResourceId = AllocatableResourceId.NewOne();
     private static readonly AllocatableResourceId AllocatableResourceId2 = AllocatableResourceId.NewOne();

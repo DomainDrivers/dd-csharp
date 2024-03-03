@@ -4,12 +4,13 @@ using DomainDrivers.SmartSchedule.Allocation.Cashflow;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Resource.Device;
 using DomainDrivers.SmartSchedule.Resource.Employee;
+using DomainDrivers.SmartSchedule.Risk;
 using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule;
 
 public class SmartScheduleDbContext : DbContext, IPlanningDbContext, IAllocationDbContext,
-    ICashflowDbContext, IEmployeeDbContext, IDeviceDbContext, ICapabilitySchedulingDbContext
+    ICashflowDbContext, IEmployeeDbContext, IDeviceDbContext, ICapabilitySchedulingDbContext, IRiskDbContext
 {
     public SmartScheduleDbContext(DbContextOptions<SmartScheduleDbContext> options)
         : base(options)
@@ -22,6 +23,7 @@ public class SmartScheduleDbContext : DbContext, IPlanningDbContext, IAllocation
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Device> Devices { get; set; } = null!;
     public DbSet<AllocatableCapability> AllocatableCapabilities { get; set; } = null!;
+    public DbSet<RiskPeriodicCheckSaga> RiskPeriodicCheckSagas { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
