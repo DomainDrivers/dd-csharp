@@ -8,13 +8,18 @@ public class AvailabilityFacade
 {
     private readonly ResourceAvailabilityRepository _availabilityRepository;
     private readonly ResourceAvailabilityReadModel _availabilityReadModel;
+    private readonly IEventsPublisher _eventsPublisher;
+    private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
     public AvailabilityFacade(ResourceAvailabilityRepository availabilityRepository,
-        ResourceAvailabilityReadModel availabilityReadModel, IUnitOfWork unitOfWork)
+        ResourceAvailabilityReadModel availabilityReadModel, IEventsPublisher eventsPublisher,
+        TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
         _availabilityRepository = availabilityRepository;
         _availabilityReadModel = availabilityReadModel;
+        _eventsPublisher = eventsPublisher;
+        _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
 
@@ -87,11 +92,18 @@ public class AvailabilityFacade
                 return false;
             }
 
+            var previousOwners = toDisable.Owners();
             var result = toDisable.Disable(requester);
 
             if (result)
             {
                 result = await _availabilityRepository.SaveCheckingVersion(toDisable);
+
+                if (result)
+                {
+                    await _eventsPublisher.Publish(new ResourceTakenOver(resourceId, previousOwners, timeSlot,
+                        _timeProvider.GetUtcNow().DateTime));
+                }
             }
 
             return result;

@@ -11,14 +11,19 @@ public class PlanningFacade
     private readonly IPlanningDbContext _planningDbContext;
     private readonly StageParallelization _parallelization;
     private readonly PlanChosenResources _planChosenResourcesService;
+    private readonly IEventsPublisher _eventsPublisher;
+    private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
     public PlanningFacade(IPlanningDbContext planningDbContext, StageParallelization parallelization,
-        PlanChosenResources resourcesPlanning, IUnitOfWork unitOfWork)
+        PlanChosenResources resourcesPlanning, IEventsPublisher eventsPublisher, TimeProvider timeProvider,
+        IUnitOfWork unitOfWork)
     {
         _planningDbContext = planningDbContext;
         _parallelization = parallelization;
         _planChosenResourcesService = resourcesPlanning;
+        _eventsPublisher = eventsPublisher;
+        _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
 
@@ -63,6 +68,8 @@ public class PlanningFacade
         {
             var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
             project.AddDemands(demands);
+            await _eventsPublisher.Publish(new CapabilitiesDemanded(projectId, project.AllDemands,
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
 
@@ -72,6 +79,8 @@ public class PlanningFacade
         {
             var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
             project.AddDemandsPerStage(demandsPerStage);
+            await _eventsPublisher.Publish(new CapabilitiesDemanded(projectId, project.AllDemands,
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
 
@@ -101,6 +110,8 @@ public class PlanningFacade
         {
             var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
             project.AddSchedule(criticalStage, stageTimeSlot);
+            await _eventsPublisher.Publish(new CriticalStagePlanned(projectId, stageTimeSlot, resourceId,
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
 
@@ -110,6 +121,8 @@ public class PlanningFacade
         {
             var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
             project.AddSchedule(criticalStage, stageTimeSlot);
+            await _eventsPublisher.Publish(new CriticalStagePlanned(projectId, stageTimeSlot, null,
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
 

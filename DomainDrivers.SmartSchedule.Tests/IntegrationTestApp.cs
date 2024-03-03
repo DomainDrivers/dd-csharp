@@ -1,7 +1,11 @@
 using System.Reflection;
+using DomainDrivers.SmartSchedule.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
 using Testcontainers.PostgreSql;
 
 namespace DomainDrivers.SmartSchedule.Tests;
@@ -27,6 +31,10 @@ public class IntegrationTestApp : WebApplicationFactory<Program>, IAsyncLifetime
             })
             .Build();
         builder.UseConfiguration(config);
+        builder.ConfigureTestServices(services =>
+        {
+            services.Replace(ServiceDescriptor.Scoped<IEventsPublisher>(_ => Substitute.For<IEventsPublisher>()));
+        });
         base.ConfigureWebHost(builder);
     }
 

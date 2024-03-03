@@ -111,4 +111,11 @@ public class ResourceGroupedAvailability
             .Where(ra => ra.BlockedBy == owner)
             .ToList();
     }
+
+    public ISet<Owner> Owners()
+    {
+        return Availabilities
+            .Select(x => x.BlockedBy)
+            .ToHashSet();
+    }
 }

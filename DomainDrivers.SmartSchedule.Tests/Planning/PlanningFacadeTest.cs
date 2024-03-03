@@ -1,9 +1,11 @@
+using System.Linq.Expressions;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
 using DomainDrivers.SmartSchedule.Shared;
 using NUnit.Framework.Legacy;
+using NSubstitute;
 using Demands = DomainDrivers.SmartSchedule.Planning.Demands;
 using static DomainDrivers.SmartSchedule.Planning.Demand;
 using static DomainDrivers.SmartSchedule.Shared.Capability;
@@ -13,10 +15,12 @@ namespace DomainDrivers.SmartSchedule.Tests.Planning;
 public class PlanningFacadeTest : IntegrationTest
 {
     private readonly PlanningFacade _projectFacade;
+    private readonly IEventsPublisher _eventsPublisher;
 
     public PlanningFacadeTest(IntegrationTestApp testApp) : base(testApp)
     {
         _projectFacade = Scope.ServiceProvider.GetRequiredService<PlanningFacade>();
+        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
     }
 
     [Fact]
@@ -214,5 +218,28 @@ public class PlanningFacadeTest : IntegrationTest
         //then
         var loaded = await _projectFacade.Load(projectId);
         CollectionAssert.AreEquivalent(dates, loaded.Schedule.Dates);
+    }
+
+    [Fact]
+    public async Task CapabilitiesDemandedEventIsEmittedAfterAddingDemands()
+    {
+        //given
+        var projectId = await _projectFacade.AddNewProject("project", new Stage("Stage1"));
+        //and
+        var demandForJava = Demands.Of(DemandFor(Skill("JAVA")));
+        await _projectFacade.AddDemands(projectId, demandForJava);
+
+        //then
+        await _eventsPublisher
+            .Received(1)
+            .Publish(Arg.Is(CapabilitiesDemanded(projectId, demandForJava)));
+    }
+
+    private static Expression<Predicate<CapabilitiesDemanded>> CapabilitiesDemanded(ProjectId projectId, Demands demands)
+    {
+        return @event =>
+            @event.ProjectId == projectId
+            && @event.Demands == demands
+            && @event.Uuid != default;
     }
 }

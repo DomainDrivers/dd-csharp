@@ -10,12 +10,17 @@ public class PlanChosenResources
 {
     private readonly IPlanningDbContext _planningDbContext;
     private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IEventsPublisher _eventsPublisher;
+    private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public PlanChosenResources(IPlanningDbContext planningDbContext, AvailabilityFacade availabilityFacade, IUnitOfWork unitOfWork)
+    public PlanChosenResources(IPlanningDbContext planningDbContext, AvailabilityFacade availabilityFacade,
+        IEventsPublisher eventsPublisher, TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
         _planningDbContext = planningDbContext;
         _availabilityFacade = availabilityFacade;
+        _eventsPublisher = eventsPublisher;
+        _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
 
@@ -26,6 +31,8 @@ public class PlanChosenResources
         {
             var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
             project.AddChosenResources(new ChosenResources(chosenResources, timeBoundaries));
+            await _eventsPublisher.Publish(new NeededResourcesChosen(projectId, chosenResources, timeBoundaries,
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
 

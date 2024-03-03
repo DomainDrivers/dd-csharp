@@ -1,15 +1,19 @@
+using System.Linq.Expressions;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
+using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
 public class AvailabilityFacadeTest : IntegrationTest
 {
     private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IEventsPublisher _eventsPublisher;
 
     public AvailabilityFacadeTest(IntegrationTestApp testApp) : base(testApp)
     {
         _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
+        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
     }
 
     [Fact]
@@ -223,5 +227,36 @@ public class AvailabilityFacadeTest : IntegrationTest
         Assert.Empty(dailyCalendar.AvailableSlots());
         Assert.True(dailyCalendar.TakenBy(owner).SequenceEqual(oneDay.LeftoverAfterRemovingCommonWith(fifteenMinutes)));
         Assert.True(dailyCalendar.TakenBy(newRequester).SequenceEqual(new[] { fifteenMinutes }));
+    }
+
+    [Fact]
+    public async Task ResourceTakenOverEventIsEmittedAfterTakingOverTheResource()
+    {
+        //given
+        var resourceId = ResourceId.NewOne();
+        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
+        var initialOwner = Owner.NewOne();
+        var newOwner = Owner.NewOne();
+        await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
+        await _availabilityFacade.Block(resourceId, oneDay, initialOwner);
+
+        //when
+        var result = await _availabilityFacade.Disable(resourceId, oneDay, newOwner);
+
+        //then
+        Assert.True(result);
+        await _eventsPublisher
+            .Received(1)
+            .Publish(Arg.Is(TakenOver(resourceId, initialOwner, oneDay)));
+    }
+
+    private static Expression<Predicate<ResourceTakenOver>> TakenOver(ResourceId resourceId, Owner initialOwner, TimeSlot oneDay)
+    {
+        return @event =>
+            @event.ResourceId == resourceId
+            && @event.Slot == oneDay
+            && @event.PreviousOwners.SetEquals(new HashSet<Owner>() { initialOwner })
+            && @event.OccurredAt != default
+            && @event.EventId != default;
     }
 }

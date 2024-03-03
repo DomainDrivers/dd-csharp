@@ -6,11 +6,16 @@ namespace DomainDrivers.SmartSchedule.Allocation.Cashflow;
 public class CashFlowFacade
 {
     private readonly ICashflowDbContext _cashflowDbContext;
+    private readonly IEventsPublisher _eventsPublisher;
+    private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CashFlowFacade(ICashflowDbContext cashflowDbContext, IUnitOfWork unitOfWork)
+    public CashFlowFacade(ICashflowDbContext cashflowDbContext, IEventsPublisher eventsPublisher,
+        TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
         _cashflowDbContext = cashflowDbContext;
+        _eventsPublisher = eventsPublisher;
+        _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
 
@@ -26,6 +31,8 @@ public class CashFlowFacade
             }
 
             cashflow.Update(income, cost);
+            await _eventsPublisher.Publish(new EarningsRecalculated(projectId, cashflow.Earnings(),
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
 

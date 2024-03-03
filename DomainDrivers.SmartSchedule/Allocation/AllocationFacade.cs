@@ -10,15 +10,17 @@ public class AllocationFacade
     private readonly IAllocationDbContext _allocationDbContext;
     private readonly AvailabilityFacade _availabilityFacade;
     private readonly CapabilityFinder _capabilityFinder;
+    private readonly IEventsPublisher _eventsPublisher;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
     public AllocationFacade(IAllocationDbContext allocationDbContext, AvailabilityFacade availabilityFacade,
-        CapabilityFinder capabilityFinder, TimeProvider timeProvider, IUnitOfWork unitOfWork)
+        CapabilityFinder capabilityFinder, IEventsPublisher eventsPublisher, TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
         _allocationDbContext = allocationDbContext;
         _availabilityFacade = availabilityFacade;
         _capabilityFinder = capabilityFinder;
+        _eventsPublisher = eventsPublisher;
         _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
     }
@@ -30,6 +32,8 @@ public class AllocationFacade
             var projectId = ProjectAllocationsId.NewOne();
             var projectAllocations = new ProjectAllocations(projectId, Allocations.None(), scheduledDemands, timeSlot);
             await _allocationDbContext.ProjectAllocations.AddAsync(projectAllocations);
+            await _eventsPublisher.Publish(new ProjectAllocationScheduled(projectId, timeSlot,
+                _timeProvider.GetUtcNow().DateTime));
             return projectId;
         });
     }
@@ -139,6 +143,8 @@ public class AllocationFacade
             var projectAllocations =
                 await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
             projectAllocations.DefineSlot(fromTo, _timeProvider.GetUtcNow().DateTime);
+            await _eventsPublisher.Publish(new ProjectAllocationScheduled(projectId, fromTo,
+                _timeProvider.GetUtcNow().DateTime));
         });
     }
     
@@ -153,7 +159,12 @@ public class AllocationFacade
                 await _allocationDbContext.ProjectAllocations.AddAsync(projectAllocations);
             }
 
-            projectAllocations.AddDemands(demands, _timeProvider.GetUtcNow().DateTime);
+            var @event = projectAllocations.AddDemands(demands, _timeProvider.GetUtcNow().DateTime);
+
+            if (@event != null)
+            {
+                await _eventsPublisher.Publish(@event);
+            }
         });
     }
 }

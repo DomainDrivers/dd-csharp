@@ -1,10 +1,12 @@
-﻿namespace DomainDrivers.SmartSchedule.Allocation;
+﻿using DomainDrivers.SmartSchedule.Shared;
+
+namespace DomainDrivers.SmartSchedule.Allocation;
 
 public record ProjectAllocationsDemandsScheduled(
     Guid Uuid,
     ProjectAllocationsId ProjectAllocationsId,
     Demands MissingDemands,
-    DateTime OccurredAt)
+    DateTime OccurredAt) : IEvent
 {
     public ProjectAllocationsDemandsScheduled(ProjectAllocationsId projectId, Demands missingDemands,
         DateTime occurredAt)

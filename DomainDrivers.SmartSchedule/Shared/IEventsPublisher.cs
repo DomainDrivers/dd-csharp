@@ -4,7 +4,8 @@ namespace DomainDrivers.SmartSchedule.Shared;
 
 public interface IEventsPublisher
 {
-    Task PublishAfterCommit(IEvent @event);
+    //remember about transactions scope
+    Task Publish(IEvent @event);
 }
 
 public class EventsPublisher : IEventsPublisher
@@ -16,7 +17,7 @@ public class EventsPublisher : IEventsPublisher
         _mediator = mediator;
     }
 
-    public async Task PublishAfterCommit(IEvent @event)
+    public async Task Publish(IEvent @event)
     {
         await _mediator.Publish(@event);
     }

@@ -6,7 +6,7 @@ public record ProjectAllocationScheduled(
     Guid Uuid,
     ProjectAllocationsId ProjectAllocationsId,
     TimeSlot FromTo,
-    DateTime OccurredAt)
+    DateTime OccurredAt) : IEvent
 {
     public ProjectAllocationScheduled(ProjectAllocationsId projectId, TimeSlot FromTo,
         DateTime occurredAt)
