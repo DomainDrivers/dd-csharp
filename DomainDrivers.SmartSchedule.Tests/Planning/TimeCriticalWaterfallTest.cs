@@ -23,7 +23,7 @@ public class TimeCriticalWaterfallTest : IntegrationTestWithSharedApp
         _projectFacade = Scope.ServiceProvider.GetRequiredService<PlanningFacade>();
     }
 
-    [Fact(Skip = "not implemented yet")]
+    [Fact]
     public async Task TimeCriticalWaterfallProjectProcess()
     {
         //given

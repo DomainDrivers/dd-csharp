@@ -30,7 +30,7 @@ public class SpecializedWaterfallTest : IntegrationTestWithSharedApp
         _projectFacade = Scope.ServiceProvider.GetRequiredService<PlanningFacade>();
     }
 
-    [Fact(Skip = "not implemented yet")]
+    [Fact]
     public async Task SpecializedWaterfallProjectProcess()
     {
         //given
