@@ -51,9 +51,16 @@ public class RiskPeriodicCheckSaga
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public RiskPeriodicCheckSagaStep? HandleMissingDemands(Demands missingDemands) {
-        //TODO implement
-        return null;
+    public RiskPeriodicCheckSagaStep? HandleMissingDemands(Demands missingDemands)
+    {
+        MissingDemands = missingDemands;
+
+        if (AreDemandsSatisfied)
+        {
+            return RiskPeriodicCheckSagaStep.NotifyAboutDemandsSatisfied;
+        }
+
+        return RiskPeriodicCheckSagaStep.DoNothing;
     }
     
     public RiskPeriodicCheckSagaStep Handle(ProjectAllocationScheduled @event)
