@@ -35,7 +35,10 @@ public class CreateHourlyDemandsSummaryService
 {
     public NotSatisfiedDemands Create(IList<ProjectAllocations> projectAllocations, DateTime when)
     {
-        return new NotSatisfiedDemands(projectAllocations.ToDictionary(x => x.ProjectId, x => x.MissingDemands()),
-            when);
+        var missingDemands =
+            projectAllocations
+                .Where(x => x.HasTimeSlot)
+                .ToDictionary(x => x.ProjectId, x => x.MissingDemands());
+        return new NotSatisfiedDemands(missingDemands, when);
     }
 }
