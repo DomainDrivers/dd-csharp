@@ -52,18 +52,30 @@ public class RiskPeriodicCheckSagaTest
     }
 
     [Fact]
-    public void UpdatesDemandsOnScheduleChange()
+    public void UpdateMissingDemands()
     {
         //given
         var saga = new RiskPeriodicCheckSaga(ProjectId, SingleDemand);
 
         //when
         var nextStep =
-            saga.Handle(new ProjectAllocationsDemandsScheduled(ProjectId, ManyDemands, Clock.GetUtcNow().DateTime));
+            saga.HandleMissingDemands(ManyDemands);
 
         //then
         Assert.Equal(DoNothing, nextStep);
         Assert.Equal(ManyDemands, saga.MissingDemands);
+    }
+    
+    [Fact]
+    public void NoNewStepsOnWhenMissingDemands() {
+        //given
+        var saga = new RiskPeriodicCheckSaga(ProjectId, ManyDemands);
+
+        //when
+        var nextStep = saga.HandleMissingDemands(ManyDemands);
+
+        //then
+        Assert.Equal(DoNothing, nextStep);
     }
 
     [Fact]
@@ -88,7 +100,7 @@ public class RiskPeriodicCheckSagaTest
     }
     
     [Fact]
-        public void InformsAboutDemandsSatisfiedWhenDemandsRescheduled()
+        public void InformsAboutDemandsSatisfiedWhenNoMissingdemands()
         {
             //given
             var saga = new RiskPeriodicCheckSaga(ProjectId, ManyDemands);
@@ -96,8 +108,8 @@ public class RiskPeriodicCheckSagaTest
             saga.Handle(new EarningsRecalculated(ProjectId, Earnings.Of(1000), Clock.GetUtcNow().DateTime));
 
             //when
-            var stillMissing = saga.Handle(new ProjectAllocationsDemandsScheduled(ProjectId, SingleDemand, Clock.GetUtcNow().DateTime));
-            var zeroDemands = saga.Handle(new ProjectAllocationsDemandsScheduled(ProjectId, Demands.None(), Clock.GetUtcNow().DateTime));
+            var stillMissing = saga.HandleMissingDemands(SingleDemand);
+            var zeroDemands = saga.HandleMissingDemands(Demands.None());
 
             //then
             Assert.Equal(DoNothing, stillMissing);
@@ -105,38 +117,10 @@ public class RiskPeriodicCheckSagaTest
         }
 
         [Fact]
-        public void NotifyAboutNoMissingDemandsOnCapabilityAllocated()
-        {
-            //given
-            var saga = new RiskPeriodicCheckSaga(ProjectId, SingleDemand);
-
-            //when
-            var nextStep = saga.Handle(new CapabilitiesAllocated(Guid.NewGuid(), ProjectId, Demands.None(), Clock.GetUtcNow().DateTime));
-
-            //then
-            Assert.Equal(RiskPeriodicCheckSagaStep.NotifyAboutDemandsSatisfied, nextStep);
-        }
-
-        [Fact]
-        public void NoNewStepsOnCapabilityAllocatedWhenMissingDemands()
-        {
-            //given
-            var saga = new RiskPeriodicCheckSaga(ProjectId, ManyDemands);
-
-            //when
-            var nextStep = saga.Handle(new CapabilitiesAllocated(Guid.NewGuid(), ProjectId, SingleDemand, Clock.GetUtcNow().DateTime));
-
-            //then
-            Assert.Equal(DoNothing, nextStep);
-        }
-
-        [Fact]
         public void DoNothingOnResourceTakenOverWhenAfterDeadline()
         {
             //given
             var saga = new RiskPeriodicCheckSaga(ProjectId, ManyDemands);
-            //and
-            saga.Handle(new CapabilitiesAllocated(Guid.NewGuid(), ProjectId, SingleDemand, Clock.GetUtcNow().DateTime));
             //and
             saga.Handle(new ProjectAllocationScheduled(ProjectId, ProjectDates, Clock.GetUtcNow().DateTime));
 
@@ -154,8 +138,6 @@ public class RiskPeriodicCheckSagaTest
             //given
             var saga = new RiskPeriodicCheckSaga(ProjectId, ManyDemands);
             //and
-            saga.Handle(new CapabilitiesAllocated(Guid.NewGuid(), ProjectId, ManyDemands, Clock.GetUtcNow().DateTime));
-            //and
             saga.Handle(new ProjectAllocationScheduled(ProjectId, ProjectDates, Clock.GetUtcNow().DateTime));
 
             //when
@@ -171,11 +153,9 @@ public class RiskPeriodicCheckSagaTest
         {
             //given
             var saga = new RiskPeriodicCheckSaga(ProjectId, SingleDemand);
-            //and
-            saga.Handle(new CapabilitiesAllocated(Guid.NewGuid(), ProjectId, Demands.None(), Clock.GetUtcNow().DateTime));
 
             //when
-            var nextStep = saga.Handle(new CapabilityReleased(ProjectId, SingleDemand, Clock.GetUtcNow().DateTime));
+            var nextStep = saga.HandleMissingDemands(SingleDemand);
 
             //then
             Assert.Equal(DoNothing, nextStep);
@@ -189,7 +169,7 @@ public class RiskPeriodicCheckSagaTest
             //and
             saga.Handle(new EarningsRecalculated(ProjectId, Earnings.Of(1000), Clock.GetUtcNow().DateTime));
             //and
-            saga.Handle(new CapabilitiesAllocated(Guid.NewGuid(), ProjectId, Demands.None(), Clock.GetUtcNow().DateTime));
+            saga.HandleMissingDemands(Demands.None());
             //and
             saga.Handle(new ProjectAllocationScheduled(ProjectId, ProjectDates, Clock.GetUtcNow().DateTime));
 

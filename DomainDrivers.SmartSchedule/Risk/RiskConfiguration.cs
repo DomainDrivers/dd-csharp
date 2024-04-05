@@ -28,7 +28,6 @@ public static class RiskConfiguration
                 .WithIdentity("RiskPeriodicCheckSagaWeeklyCheckJob-trigger")
                 .WithCronSchedule("0 0 12 ? * SUN"));
         });
-        serviceCollection.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         return serviceCollection;
     }
 }

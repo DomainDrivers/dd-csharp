@@ -7,7 +7,7 @@ public record ResourceTakenOver(
     ResourceId ResourceId,
     ISet<Owner> PreviousOwners,
     TimeSlot Slot,
-    DateTime OccurredAt) : IEvent
+    DateTime OccurredAt) : IPublishedEvent
 {
     public ResourceTakenOver(ResourceId resourceId,
         ISet<Owner> previousOwners,

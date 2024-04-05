@@ -7,7 +7,7 @@ public record NeededResourcesChosen(
     ProjectId ProjectId,
     ISet<ResourceId> NeededResources,
     TimeSlot TimeSlot,
-    DateTime OccurredAt) : IEvent
+    DateTime OccurredAt) : IPublishedEvent
 {
     public override int GetHashCode()
     {

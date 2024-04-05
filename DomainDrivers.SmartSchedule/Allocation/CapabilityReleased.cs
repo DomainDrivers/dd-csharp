@@ -6,7 +6,7 @@ public record CapabilityReleased(
     Guid EventId,
     ProjectAllocationsId ProjectId,
     Demands MissingDemands,
-    DateTime OccurredAt) : IEvent
+    DateTime OccurredAt) : IPrivateEvent
 {
     public CapabilityReleased(ProjectAllocationsId projectId, Demands missingDemands, DateTime occurredAt)
         : this(Guid.NewGuid(), projectId, missingDemands, occurredAt)

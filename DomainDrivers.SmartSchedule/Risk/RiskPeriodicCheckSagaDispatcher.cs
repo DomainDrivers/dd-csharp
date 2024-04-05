@@ -7,10 +7,9 @@ using MediatR;
 
 namespace DomainDrivers.SmartSchedule.Risk;
 
-public class RiskPeriodicCheckSagaDispatcher : INotificationHandler<ProjectAllocationsDemandsScheduled>,
+public class RiskPeriodicCheckSagaDispatcher :
     INotificationHandler<EarningsRecalculated>, INotificationHandler<ProjectAllocationScheduled>,
-    INotificationHandler<CapabilitiesAllocated>, INotificationHandler<CapabilityReleased>,
-    INotificationHandler<ResourceTakenOver>
+    INotificationHandler<ResourceTakenOver>, INotificationHandler<NotSatisfiedDemands>
 {
     private readonly RiskPeriodicCheckSagaRepository _riskSagaRepository;
     private readonly PotentialTransfersService _potentialTransfersService;
@@ -32,24 +31,42 @@ public class RiskPeriodicCheckSagaDispatcher : INotificationHandler<ProjectAlloc
     }
 
     //remember about transactions spanning saga and potential external system
-    public async Task Handle(ProjectAllocationsDemandsScheduled @event, CancellationToken cancellationToken)
+    public async Task Handle(ProjectAllocationScheduled @event, CancellationToken cancellationToken)
     {
         var (found, nextStep) = await _unitOfWork.InTransaction(async () =>
         {
-            var found = await _riskSagaRepository.FindByProjectId(@event.ProjectAllocationsId);
-
-            if (found == null)
-            {
-                found = new RiskPeriodicCheckSaga(@event.ProjectAllocationsId, @event.MissingDemands);
-                await _riskSagaRepository.Add(found);
-            }
-
+            var found = await _riskSagaRepository.FindByProjectIdOrCreate(@event.ProjectAllocationsId);
             var nextStep = found.Handle(@event);
             return (found, nextStep);
         });
         await Perform(nextStep, found);
     }
+    
+    //remember about transactions spanning saga and potential external system
+    public async Task Handle(NotSatisfiedDemands @event, CancellationToken cancellationToken)
+    {
+        var nextSteps = await _unitOfWork.InTransaction(async () =>
+        {
+            var sagas = await _riskSagaRepository.FindByProjectIdInOrElseCreate(
+                new List<ProjectAllocationsId>(@event.MissingDemands.Keys));
+            IDictionary<RiskPeriodicCheckSaga, RiskPeriodicCheckSagaStep?> nextSteps =
+                new Dictionary<RiskPeriodicCheckSaga, RiskPeriodicCheckSagaStep?>();
+            foreach (var saga in sagas)
+            {
+                var missingDemands = @event.MissingDemands[saga.ProjectId];
+                var nextStep = saga.HandleMissingDemands(missingDemands);
+                nextSteps[saga] = nextStep;
+            }
 
+            return nextSteps;
+        });
+
+        foreach (var (saga, nextStep) in nextSteps)
+        {
+            await Perform(nextStep, saga);
+        }
+    }
+    
     //remember about transactions spanning saga and potential external system
     public async Task Handle(EarningsRecalculated @event, CancellationToken cancellationToken)
     {
@@ -68,43 +85,7 @@ public class RiskPeriodicCheckSagaDispatcher : INotificationHandler<ProjectAlloc
         });
         await Perform(nextStep, found);
     }
-
-    //remember about transactions spanning saga and potential external system
-    public async Task Handle(ProjectAllocationScheduled @event, CancellationToken cancellationToken)
-    {
-        var (found, nextStep) = await _unitOfWork.InTransaction(async () =>
-        {
-            var found = await _riskSagaRepository.FindByProjectId(@event.ProjectAllocationsId);
-            var nextStep = found!.Handle(@event);
-            return (found, nextStep);
-        });
-        await Perform(nextStep, found);
-    }
-
-    //remember about transactions spanning saga and potential external system
-    public async Task Handle(CapabilitiesAllocated @event, CancellationToken cancellationToken)
-    {
-        var (found, nextStep) = await _unitOfWork.InTransaction(async () =>
-        {
-            var found = await _riskSagaRepository.FindByProjectId(@event.ProjectId);
-            var nextStep = found!.Handle(@event);
-            return (found, nextStep);
-        });
-        await Perform(nextStep, found);
-    }
-
-    //remember about transactions spanning saga and potential external system
-    public async Task Handle(CapabilityReleased @event, CancellationToken cancellationToken)
-    {
-        var (found, nextStep) = await _unitOfWork.InTransaction(async () =>
-        {
-            var found = await _riskSagaRepository.FindByProjectId(@event.ProjectId);
-            var nextStep = found!.Handle(@event);
-            return (found, nextStep);
-        });
-        await Perform(nextStep, found);
-    }
-
+    
     //remember about transactions spanning saga and potential external system
     public async Task Handle(ResourceTakenOver @event, CancellationToken cancellationToken)
     {

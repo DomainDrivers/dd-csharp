@@ -7,4 +7,4 @@ public record CriticalStagePlanned(
     ProjectId ProjectId,
     TimeSlot StageTimeSlot,
     ResourceId? CriticalResource,
-    DateTime OccurredAt) : IEvent;
+    DateTime OccurredAt) : IPublishedEvent;

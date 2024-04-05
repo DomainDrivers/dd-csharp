@@ -37,21 +37,6 @@ public class DemandSchedulingTest : IntegrationTestWithSharedApp
         Assert.Equal(Demands.Of(Java).All, summary.Demands[projectId].All);
     }
 
-    [Fact]
-    public async Task ProjectDemandsScheduledEventIsEmittedAfterDefiningDemands()
-    {
-        //given
-        var projectId = ProjectAllocationsId.NewOne();
-
-        //when
-        await _allocationFacade.ScheduleProjectAllocationDemands(projectId, Demands.Of(Java));
-
-        //then
-        await _eventsPublisher
-            .Received(1)
-            .Publish(Arg.Is(IsProjectDemandsScheduledEvent(projectId, Demands.Of(Java))));
-    }
-
     private static Expression<Predicate<ProjectAllocationsDemandsScheduled>> IsProjectDemandsScheduledEvent(ProjectAllocationsId projectId, Demands demands)
     {
         return @event =>

@@ -1,6 +1,7 @@
 ﻿using DomainDrivers.SmartSchedule.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Quartz;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
 
@@ -12,6 +13,16 @@ public static class AllocationConfiguration
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
         serviceCollection.AddTransient<AllocationFacade>();
         serviceCollection.AddTransient<PotentialTransfersService>();
+        serviceCollection.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("PublishMissingDemandsJob");
+            q.AddJob<PublishMissingDemandsJob>(opts => opts.WithIdentity(jobKey));
+
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("PublishMissingDemandsJob-trigger")
+                .WithCronSchedule("0 0 * ? * *"));
+        });
         return serviceCollection;
     }
 }

@@ -1,0 +1,38 @@
+﻿using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Shared;
+using NUnit.Framework.Legacy;
+using static DomainDrivers.SmartSchedule.Shared.Capability;
+
+namespace DomainDrivers.SmartSchedule.Tests.Allocation;
+
+public class CreateHourlyDemandsSummaryServiceTest
+{
+    private static readonly DateTime Now = DateTime.UtcNow;
+    private static readonly TimeSlot Jan = TimeSlot.CreateMonthlyTimeSlotAtUtc(2021, 1);
+    private static readonly Demands Csharp = Demands.Of(new Demand(Skill("CSHARP"), Jan));
+    private static readonly Demands Java = Demands.Of(new Demand(Skill("JAVA"), Jan));
+
+    private readonly CreateHourlyDemandsSummaryService _service = new CreateHourlyDemandsSummaryService();
+
+    [Fact]
+    public void CreatesMissingDemandsSummaryForAllGivenProjects()
+    {
+        //given
+        var csharpProjectId = ProjectAllocationsId.NewOne();
+        var javaProjectId = ProjectAllocationsId.NewOne();
+        var csharpProject = new ProjectAllocations(csharpProjectId, Allocations.None(), Csharp);
+        var javaProject = new ProjectAllocations(javaProjectId, Allocations.None(), Java);
+
+        //when
+        var result = _service.Create(new List<ProjectAllocations>() { csharpProject, javaProject }, Now);
+
+        //then
+        Assert.Equal(Now, result.OccurredAt);
+        var expectedMissingDemands = new Dictionary<ProjectAllocationsId, Demands>()
+        {
+            { javaProjectId, Java },
+            { csharpProjectId, Csharp }
+        };
+        CollectionAssert.AreEquivalent(expectedMissingDemands, result.MissingDemands);
+    }
+}

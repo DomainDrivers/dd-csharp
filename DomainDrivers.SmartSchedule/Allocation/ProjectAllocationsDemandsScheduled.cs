@@ -6,7 +6,7 @@ public record ProjectAllocationsDemandsScheduled(
     Guid Uuid,
     ProjectAllocationsId ProjectAllocationsId,
     Demands MissingDemands,
-    DateTime OccurredAt) : IEvent
+    DateTime OccurredAt) : IPrivateEvent
 {
     public ProjectAllocationsDemandsScheduled(ProjectAllocationsId projectId, Demands missingDemands,
         DateTime occurredAt)

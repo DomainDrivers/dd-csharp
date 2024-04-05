@@ -38,34 +38,36 @@ public class RiskPeriodicCheckSaga
         Earnings = earnings;
     }
 
+    public RiskPeriodicCheckSaga(ProjectAllocationsId projectId)
+    {
+        _riskSagaId = RiskPeriodicCheckSagaId.NewOne();
+        ProjectId = projectId;
+        MissingDemands = Demands.None();
+    }
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    private RiskPeriodicCheckSaga() { }
+    private RiskPeriodicCheckSaga()
+    {
+    }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public RiskPeriodicCheckSagaStep Handle(EarningsRecalculated @event)
-    {
-        Earnings = @event.Earnings;
-        return RiskPeriodicCheckSagaStep.DoNothing;
+    public RiskPeriodicCheckSagaStep? HandleMissingDemands(Demands missingDemands) {
+        //TODO implement
+        return null;
     }
-
-    public RiskPeriodicCheckSagaStep Handle(ProjectAllocationsDemandsScheduled @event)
-    {
-        MissingDemands = @event.MissingDemands;
-
-        if (AreDemandsSatisfied)
-        {
-            return RiskPeriodicCheckSagaStep.NotifyAboutDemandsSatisfied;
-        }
-
-        return RiskPeriodicCheckSagaStep.DoNothing;
-    }
-
+    
     public RiskPeriodicCheckSagaStep Handle(ProjectAllocationScheduled @event)
     {
         Deadline = @event.FromTo.To;
         return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
+    public RiskPeriodicCheckSagaStep Handle(EarningsRecalculated @event)
+    {
+        Earnings = @event.Earnings;
+        return RiskPeriodicCheckSagaStep.DoNothing;
+    }
+    
     public RiskPeriodicCheckSagaStep Handle(ResourceTakenOver @event)
     {
         if (@event.OccurredAt > Deadline)
@@ -74,24 +76,6 @@ public class RiskPeriodicCheckSaga
         }
 
         return RiskPeriodicCheckSagaStep.NotifyAboutPossibleRisk;
-    }
-
-    public RiskPeriodicCheckSagaStep Handle(CapabilityReleased @event)
-    {
-        MissingDemands = @event.MissingDemands;
-        return RiskPeriodicCheckSagaStep.DoNothing;
-    }
-
-    public RiskPeriodicCheckSagaStep Handle(CapabilitiesAllocated @event)
-    {
-        MissingDemands = @event.MissingDemands;
-
-        if (AreDemandsSatisfied)
-        {
-            return RiskPeriodicCheckSagaStep.NotifyAboutDemandsSatisfied;
-        }
-
-        return RiskPeriodicCheckSagaStep.DoNothing;
     }
 
     public RiskPeriodicCheckSagaStep HandleWeeklyCheck(DateTime when)

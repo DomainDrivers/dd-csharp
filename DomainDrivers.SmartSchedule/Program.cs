@@ -15,6 +15,7 @@ using DomainDrivers.SmartSchedule.Shared;
 using DomainDrivers.SmartSchedule.Simulation;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Postgres");
@@ -36,6 +37,7 @@ builder.Services.AddCapabilityPlanning();
 builder.Services.AddOptimization();
 builder.Services.AddSimulation();
 builder.Services.AddRisk();
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 

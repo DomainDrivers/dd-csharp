@@ -144,9 +144,11 @@ public class AllocationFacade
         {
             var projectAllocations =
                 await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
-            projectAllocations.DefineSlot(fromTo, _timeProvider.GetUtcNow().DateTime);
-            await _eventsPublisher.Publish(new ProjectAllocationScheduled(projectId, fromTo,
-                _timeProvider.GetUtcNow().DateTime));
+            var projectDatesSet = projectAllocations.DefineSlot(fromTo, _timeProvider.GetUtcNow().DateTime);
+            if (projectDatesSet != null)
+            {
+                await _eventsPublisher.Publish(projectDatesSet);
+            }
         });
     }
 
@@ -162,11 +164,8 @@ public class AllocationFacade
             }
 
             var @event = projectAllocations.AddDemands(demands, _timeProvider.GetUtcNow().DateTime);
-
-            if (@event != null)
-            {
-                await _eventsPublisher.Publish(@event);
-            }
+            //event could be stored in a local store
+            //always remember about transactional boundaries
         });
     }
 }

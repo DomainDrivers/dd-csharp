@@ -7,7 +7,7 @@ public record CapabilitiesAllocated(
     Guid AllocatedCapabilityId,
     ProjectAllocationsId ProjectId,
     Demands MissingDemands,
-    DateTime OccurredAt) : IEvent
+    DateTime OccurredAt) : IPrivateEvent
 {
     public CapabilitiesAllocated(Guid allocatedCapabilityId, ProjectAllocationsId projectId, Demands missingDemands,
         DateTime occuredAt)

@@ -47,7 +47,7 @@ public class ProjectAllocations
         return new ProjectAllocations(projectId, Allocations.None(), demands);
     }
 
-    private ProjectAllocations(ProjectAllocationsId projectId, Allocations allocations, Demands demands)
+    public ProjectAllocations(ProjectAllocationsId projectId, Allocations allocations, Demands demands)
     {
         ProjectId = projectId;
         Allocations = allocations;
