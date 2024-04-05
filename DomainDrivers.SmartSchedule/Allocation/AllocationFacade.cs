@@ -1,23 +1,22 @@
 using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Allocation;
 
 public class AllocationFacade
 {
-    private readonly IAllocationDbContext _allocationDbContext;
-    private readonly AvailabilityFacade _availabilityFacade;
-    private readonly CapabilityFinder _capabilityFinder;
+    private readonly IProjectAllocationsRepository _projectAllocationsRepository;
+    private readonly IAvailabilityFacade _availabilityFacade;
+    private readonly ICapabilityFinder _capabilityFinder;
     private readonly IEventsPublisher _eventsPublisher;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public AllocationFacade(IAllocationDbContext allocationDbContext, AvailabilityFacade availabilityFacade,
-        CapabilityFinder capabilityFinder, IEventsPublisher eventsPublisher, TimeProvider timeProvider, IUnitOfWork unitOfWork)
+    public AllocationFacade(IProjectAllocationsRepository projectAllocationsRepository, IAvailabilityFacade availabilityFacade,
+        ICapabilityFinder capabilityFinder, IEventsPublisher eventsPublisher, TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
-        _allocationDbContext = allocationDbContext;
+        _projectAllocationsRepository = projectAllocationsRepository;
         _availabilityFacade = availabilityFacade;
         _capabilityFinder = capabilityFinder;
         _eventsPublisher = eventsPublisher;
@@ -31,7 +30,7 @@ public class AllocationFacade
         {
             var projectId = ProjectAllocationsId.NewOne();
             var projectAllocations = new ProjectAllocations(projectId, Allocations.None(), scheduledDemands, timeSlot);
-            await _allocationDbContext.ProjectAllocations.AddAsync(projectAllocations);
+            await _projectAllocationsRepository.Add(projectAllocations);
             await _eventsPublisher.Publish(new ProjectAllocationScheduled(projectId, timeSlot,
                 _timeProvider.GetUtcNow().DateTime));
             return projectId;
@@ -40,15 +39,12 @@ public class AllocationFacade
 
     public async Task<ProjectsAllocationsSummary> FindAllProjectsAllocations(ISet<ProjectAllocationsId> projectIds)
     {
-        //ToArray cast is needed for query to be compiled properly
-        return ProjectsAllocationsSummary.Of(await _allocationDbContext.ProjectAllocations
-            .Where(x => projectIds.ToArray().Contains(x.ProjectId))
-            .ToListAsync());
+        return ProjectsAllocationsSummary.Of(await _projectAllocationsRepository.FindAllById(projectIds));
     }
 
     public async Task<ProjectsAllocationsSummary> FindAllProjectsAllocations()
     {
-        return ProjectsAllocationsSummary.Of(await _allocationDbContext.ProjectAllocations.ToListAsync());
+        return ProjectsAllocationsSummary.Of(await _projectAllocationsRepository.FindAll());
     }
 
     public async Task<Guid?> AllocateToProject(ProjectAllocationsId projectId,
@@ -82,9 +78,10 @@ public class AllocationFacade
     private async Task<CapabilitiesAllocated?> Allocate(ProjectAllocationsId projectId,
         AllocatableCapabilityId allocatableCapabilityId, CapabilitySelector capability, TimeSlot timeSlot)
     {
-        var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
+        var allocations = await _projectAllocationsRepository.GetById(projectId);
         var @event = allocations.Allocate(allocatableCapabilityId, capability, timeSlot,
             _timeProvider.GetUtcNow().DateTime);
+        await _projectAllocationsRepository.Update(allocations);
         return @event;
     }
 
@@ -96,8 +93,9 @@ public class AllocationFacade
             //can release not scheduled capability - at least for now. Hence no check to capabilityFinder
             await _availabilityFacade.Release(allocatableCapabilityId.ToAvailabilityResourceId(), timeSlot,
                 Owner.Of(projectId.Id));
-            var allocations = await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
+            var allocations = await _projectAllocationsRepository.GetById(projectId);
             var @event = allocations.Release(allocatableCapabilityId, timeSlot, _timeProvider.GetUtcNow().DateTime);
+            await _projectAllocationsRepository.Update(allocations);
             return @event != null;
         });
     }
@@ -142,13 +140,14 @@ public class AllocationFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var projectAllocations =
-                await _allocationDbContext.ProjectAllocations.SingleAsync(x => x.ProjectId == projectId);
+            var projectAllocations = await _projectAllocationsRepository.GetById(projectId);
             var projectDatesSet = projectAllocations.DefineSlot(fromTo, _timeProvider.GetUtcNow().DateTime);
             if (projectDatesSet != null)
             {
                 await _eventsPublisher.Publish(projectDatesSet);
             }
+
+            await _projectAllocationsRepository.Update(projectAllocations);
         });
     }
 
@@ -156,11 +155,15 @@ public class AllocationFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var projectAllocations = await _allocationDbContext.ProjectAllocations.FindAsync(projectId);
+            var projectAllocations = await _projectAllocationsRepository.FindById(projectId);
             if (projectAllocations == null)
             {
                 projectAllocations = ProjectAllocations.Empty(projectId);
-                await _allocationDbContext.ProjectAllocations.AddAsync(projectAllocations);
+                await _projectAllocationsRepository.Add(projectAllocations);
+            }
+            else
+            {
+                await _projectAllocationsRepository.Update(projectAllocations);
             }
 
             var @event = projectAllocations.AddDemands(demands, _timeProvider.GetUtcNow().DateTime);

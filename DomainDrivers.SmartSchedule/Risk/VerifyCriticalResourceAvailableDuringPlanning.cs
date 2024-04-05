@@ -7,10 +7,10 @@ namespace DomainDrivers.SmartSchedule.Risk;
 
 public class VerifyCriticalResourceAvailableDuringPlanning : INotificationHandler<CriticalStagePlanned>
 {
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
     private readonly IRiskPushNotification _riskPushNotification;
 
-    public VerifyCriticalResourceAvailableDuringPlanning(AvailabilityFacade availabilityFacade,
+    public VerifyCriticalResourceAvailableDuringPlanning(IAvailabilityFacade availabilityFacade,
         IRiskPushNotification riskPushNotification)
     {
         _availabilityFacade = availabilityFacade;

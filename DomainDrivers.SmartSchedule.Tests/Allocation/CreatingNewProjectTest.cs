@@ -1,22 +1,26 @@
 ﻿using System.Linq.Expressions;
 using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
-public class CreatingNewProjectTest : IntegrationTestWithSharedApp
+public class CreatingNewProjectTest
 {
     static TimeSlot Jan = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
     static TimeSlot Feb = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 2, 1);
 
-    private readonly AllocationFacade _allocationFacade;
     private readonly IEventsPublisher _eventsPublisher;
+    private readonly AllocationFacade _allocationFacade;
 
-    public CreatingNewProjectTest(IntegrationTestApp testApp) : base(testApp)
+    public CreatingNewProjectTest()
     {
-        _allocationFacade = Scope.ServiceProvider.GetRequiredService<AllocationFacade>();
-        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
+        _eventsPublisher = Substitute.For<IEventsPublisher>();
+        _allocationFacade = new AllocationFacade(new InMemoryProjectAllocationsRepository(),
+            Substitute.For<IAvailabilityFacade>(), Substitute.For<ICapabilityFinder>(), _eventsPublisher,
+            TimeProvider.System, new InMemoryUnitOfWork());
     }
 
     [Fact]

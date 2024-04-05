@@ -30,12 +30,12 @@ public class RDTest : IntegrationTestWithSharedApp
         DateTime.Parse("2020-03-06T00:00:00.00Z"));
 
     private readonly PlanningFacade _projectFacade;
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
 
     public RDTest(IntegrationTestApp testApp) : base(testApp)
     {
         _projectFacade = Scope.ServiceProvider.GetRequiredService<PlanningFacade>();
-        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<IAvailabilityFacade>();
     }
 
     [Fact]

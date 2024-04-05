@@ -13,13 +13,13 @@ public class CapabilityAllocatingTest : IntegrationTestWithSharedApp
     private static readonly AllocatableResourceId AllocatableResourceId2 = AllocatableResourceId.NewOne();
     private static readonly AllocatableResourceId AllocatableResourceId3 = AllocatableResourceId.NewOne();
     private readonly AllocationFacade _allocationFacade;
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
     private readonly CapabilityScheduler _capabilityScheduler;
 
     public CapabilityAllocatingTest(IntegrationTestApp testApp) : base(testApp)
     {
         _allocationFacade = Scope.ServiceProvider.GetRequiredService<AllocationFacade>();
-        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<IAvailabilityFacade>();
         _capabilityScheduler = Scope.ServiceProvider.GetRequiredService<CapabilityScheduler>();
     }
 

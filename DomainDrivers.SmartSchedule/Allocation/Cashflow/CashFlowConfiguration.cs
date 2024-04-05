@@ -9,6 +9,7 @@ public static class CashFlowConfiguration
     {
         serviceCollection.AddScoped<ICashflowDbContext>(
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
+        serviceCollection.AddScoped<ICashflowRepository, CashflowRepository>();
         serviceCollection.AddTransient<CashFlowFacade>();
         return serviceCollection;
     }

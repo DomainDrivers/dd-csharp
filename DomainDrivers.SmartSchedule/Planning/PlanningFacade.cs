@@ -2,24 +2,23 @@ using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
 using DomainDrivers.SmartSchedule.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Planning;
 
 public class PlanningFacade
 {
-    private readonly IPlanningDbContext _planningDbContext;
+    private readonly IProjectRepository _projectRepository;
     private readonly StageParallelization _parallelization;
     private readonly PlanChosenResources _planChosenResourcesService;
     private readonly IEventsPublisher _eventsPublisher;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public PlanningFacade(IPlanningDbContext planningDbContext, StageParallelization parallelization,
+    public PlanningFacade(IProjectRepository projectRepository, StageParallelization parallelization,
         PlanChosenResources resourcesPlanning, IEventsPublisher eventsPublisher, TimeProvider timeProvider,
         IUnitOfWork unitOfWork)
     {
-        _planningDbContext = planningDbContext;
+        _projectRepository = projectRepository;
         _parallelization = parallelization;
         _planChosenResourcesService = resourcesPlanning;
         _eventsPublisher = eventsPublisher;
@@ -38,7 +37,7 @@ public class PlanningFacade
         return await _unitOfWork.InTransaction(async () =>
         {
             var project = new Project(name, parallelizedStages);
-            await _planningDbContext.Projects.AddAsync(project);
+            await _projectRepository.Add(project);
             return project.Id;
         });
     }
@@ -47,8 +46,9 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddSchedule(possibleStartDate);
+            await _projectRepository.Update(project);
         });
     }
 
@@ -56,9 +56,10 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             var parallelizedStages = _parallelization.Of(new HashSet<Stage>(stages));
             project.DefineStages(parallelizedStages);
+            await _projectRepository.Update(project);
         });
     }
 
@@ -66,8 +67,9 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddDemands(demands);
+            await _projectRepository.Update(project);
             await _eventsPublisher.Publish(new CapabilitiesDemanded(projectId, project.AllDemands,
                 _timeProvider.GetUtcNow().DateTime));
         });
@@ -77,8 +79,9 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddDemandsPerStage(demandsPerStage);
+            await _projectRepository.Update(project);
             await _eventsPublisher.Publish(new CapabilitiesDemanded(projectId, project.AllDemands,
                 _timeProvider.GetUtcNow().DateTime));
         });
@@ -108,8 +111,9 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddSchedule(criticalStage, stageTimeSlot);
+            await _projectRepository.Update(project);
             await _eventsPublisher.Publish(new CriticalStagePlanned(projectId, stageTimeSlot, resourceId,
                 _timeProvider.GetUtcNow().DateTime));
         });
@@ -119,8 +123,9 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddSchedule(criticalStage, stageTimeSlot);
+            await _projectRepository.Update(project);
             await _eventsPublisher.Publish(new CriticalStagePlanned(projectId, stageTimeSlot, null,
                 _timeProvider.GetUtcNow().DateTime));
         });
@@ -130,8 +135,9 @@ public class PlanningFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddSchedule(schedule);
+            await _projectRepository.Update(project);
         });
     }
 
@@ -142,23 +148,20 @@ public class PlanningFacade
 
     public async Task<ProjectCard> Load(ProjectId projectId)
     {
-        var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+        var project = await _projectRepository.GetById(projectId);
         return ToSummary(project);
     }
 
-    public IList<ProjectCard> LoadAll(HashSet<ProjectId> projectsIds)
+    public async Task<IList<ProjectCard>> LoadAll(HashSet<ProjectId> projectsIds)
     {
-        return _planningDbContext
-            .Projects
-            .Where(x => projectsIds.Contains(x.Id))
-            .AsEnumerable()
-            .Select(ToSummary)
+        return (await _projectRepository.FindAllByIdIn(projectsIds))
+            .Select(project => ToSummary(project))
             .ToList();
     }
 
     public async Task<IList<ProjectCard>> LoadAll()
     {
-        return (await _planningDbContext.Projects.ToListAsync())
+        return (await _projectRepository.FindAll())
             .Select(project => ToSummary(project))
             .ToList();
     }

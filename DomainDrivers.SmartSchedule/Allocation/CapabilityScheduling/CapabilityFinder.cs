@@ -3,12 +3,24 @@ using DomainDrivers.SmartSchedule.Shared;
 
 namespace DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 
-public class CapabilityFinder
+public interface ICapabilityFinder
 {
-    private readonly AvailabilityFacade _availabilityFacade;
+    Task<AllocatableCapabilitiesSummary> FindAvailableCapabilities(Capability capability,
+        TimeSlot timeSlot);
+
+    Task<AllocatableCapabilitiesSummary> FindCapabilities(Capability capability, TimeSlot timeSlot);
+
+    Task<AllocatableCapabilitiesSummary> FindById(IList<AllocatableCapabilityId> allocatableCapabilityIds);
+
+    Task<AllocatableCapabilitySummary?> FindById(AllocatableCapabilityId allocatableCapabilityId);
+}
+
+public class CapabilityFinder : ICapabilityFinder
+{
+    private readonly IAvailabilityFacade _availabilityFacade;
     private readonly AllocatableCapabilityRepository _allocatableResourceRepository;
 
-    public CapabilityFinder(AvailabilityFacade availabilityFacade,
+    public CapabilityFinder(IAvailabilityFacade availabilityFacade,
         AllocatableCapabilityRepository allocatableResourceRepository)
     {
         _availabilityFacade = availabilityFacade;

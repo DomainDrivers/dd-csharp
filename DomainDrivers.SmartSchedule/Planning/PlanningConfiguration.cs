@@ -10,6 +10,7 @@ public static class PlanningConfiguration
     {
         serviceCollection.AddScoped<IPlanningDbContext>(
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
+        serviceCollection.AddScoped<IProjectRepository, ProjectRepository>();
         serviceCollection.AddTransient<PlanChosenResources>();
         serviceCollection.AddTransient<StageParallelization>();
         serviceCollection.AddTransient<PlanningFacade>();

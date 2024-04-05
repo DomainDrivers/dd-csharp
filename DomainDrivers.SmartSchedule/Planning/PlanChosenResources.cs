@@ -2,22 +2,21 @@ using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
 using DomainDrivers.SmartSchedule.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Planning;
 
 public class PlanChosenResources
 {
-    private readonly IPlanningDbContext _planningDbContext;
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IProjectRepository _projectRepository;
+    private readonly IAvailabilityFacade _availabilityFacade;
     private readonly IEventsPublisher _eventsPublisher;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public PlanChosenResources(IPlanningDbContext planningDbContext, AvailabilityFacade availabilityFacade,
+    public PlanChosenResources(IProjectRepository projectRepository, IAvailabilityFacade availabilityFacade,
         IEventsPublisher eventsPublisher, TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
-        _planningDbContext = planningDbContext;
+        _projectRepository = projectRepository;
         _availabilityFacade = availabilityFacade;
         _eventsPublisher = eventsPublisher;
         _timeProvider = timeProvider;
@@ -29,8 +28,9 @@ public class PlanChosenResources
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             project.AddChosenResources(new ChosenResources(chosenResources, timeBoundaries));
+            await _projectRepository.Update(project);
             await _eventsPublisher.Publish(new NeededResourcesChosen(projectId, chosenResources, timeBoundaries,
                 _timeProvider.GetUtcNow().DateTime));
         });
@@ -42,11 +42,12 @@ public class PlanChosenResources
         await _unitOfWork.InTransaction(async () =>
         {
             var neededResources = NeededResources(stages);
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             await DefineResourcesWithinDates(projectId, neededResources, timeBoundaries);
             var neededResourcesCalendars = await _availabilityFacade.LoadCalendars(neededResources, timeBoundaries);
             var schedule = CreateScheduleAdjustingToCalendars(neededResourcesCalendars, stages.ToList());
             project.AddSchedule(schedule);
+            await _projectRepository.Update(project);
         });
     }
 

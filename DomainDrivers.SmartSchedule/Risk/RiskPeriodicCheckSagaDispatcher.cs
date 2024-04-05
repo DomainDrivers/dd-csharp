@@ -13,13 +13,13 @@ public class RiskPeriodicCheckSagaDispatcher :
 {
     private readonly RiskPeriodicCheckSagaRepository _riskSagaRepository;
     private readonly PotentialTransfersService _potentialTransfersService;
-    private readonly CapabilityFinder _capabilityFinder;
+    private readonly ICapabilityFinder _capabilityFinder;
     private readonly IRiskPushNotification _riskPushNotification;
     private readonly TimeProvider _clock;
     private readonly IUnitOfWork _unitOfWork;
 
     public RiskPeriodicCheckSagaDispatcher(RiskPeriodicCheckSagaRepository riskSagaRepository,
-        PotentialTransfersService potentialTransfersService, CapabilityFinder capabilityFinder,
+        PotentialTransfersService potentialTransfersService, ICapabilityFinder capabilityFinder,
         IRiskPushNotification riskPushNotification, TimeProvider clock, IUnitOfWork unitOfWork)
     {
         _riskSagaRepository = riskSagaRepository;

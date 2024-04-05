@@ -6,12 +6,12 @@ namespace DomainDrivers.SmartSchedule.Tests.Resource.Employee;
 
 public class ScheduleEmployeeCapabilitiesTest : IntegrationTestWithSharedApp
 {
-    private readonly CapabilityFinder _capabilityFinder;
+    private readonly ICapabilityFinder _capabilityFinder;
     private readonly EmployeeFacade _employeeFacade;
 
     public ScheduleEmployeeCapabilitiesTest(IntegrationTestApp testApp) : base(testApp)
     {
-        _capabilityFinder = Scope.ServiceProvider.GetRequiredService<CapabilityFinder>();
+        _capabilityFinder = Scope.ServiceProvider.GetRequiredService<ICapabilityFinder>();
         _employeeFacade = Scope.ServiceProvider.GetRequiredService<EmployeeFacade>();
     }
 

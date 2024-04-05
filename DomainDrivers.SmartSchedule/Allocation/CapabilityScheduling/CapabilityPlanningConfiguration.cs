@@ -11,7 +11,7 @@ public static class CapabilityPlanningConfiguration
         serviceCollection.AddScoped<ICapabilitySchedulingDbContext>(
             sp => sp.GetRequiredService<SmartScheduleDbContext>());
         serviceCollection.AddTransient<AllocatableCapabilityRepository>();
-        serviceCollection.AddTransient<CapabilityFinder>();
+        serviceCollection.AddTransient<ICapabilityFinder, CapabilityFinder>();
         serviceCollection.AddTransient<CapabilityScheduler>();
         return serviceCollection;
     }

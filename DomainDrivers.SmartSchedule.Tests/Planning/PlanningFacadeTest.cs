@@ -12,15 +12,15 @@ using static DomainDrivers.SmartSchedule.Shared.Capability;
 
 namespace DomainDrivers.SmartSchedule.Tests.Planning;
 
-public class PlanningFacadeTest : IntegrationTestWithSharedApp
+public class PlanningFacadeTest
 {
     private readonly PlanningFacade _projectFacade;
     private readonly IEventsPublisher _eventsPublisher;
 
-    public PlanningFacadeTest(IntegrationTestApp testApp) : base(testApp)
+    public PlanningFacadeTest()
     {
-        _projectFacade = Scope.ServiceProvider.GetRequiredService<PlanningFacade>();
-        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
+        _eventsPublisher = Substitute.For<IEventsPublisher>();
+        _projectFacade = PlanningTestConfiguration.PlanningFacade(_eventsPublisher, new InMemoryProjectRepository(), new InMemoryUnitOfWork());
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class PlanningFacadeTest : IntegrationTestWithSharedApp
         var projectId2 = await _projectFacade.AddNewProject("project2", new Stage("Stage2"));
 
         //when
-        var loaded = _projectFacade.LoadAll(new HashSet<ProjectId> { projectId, projectId2 });
+        var loaded = await _projectFacade.LoadAll(new HashSet<ProjectId> { projectId, projectId2 });
 
         //then
         CollectionAssert.AreEquivalent(new[] { projectId, projectId2 }, loaded.Select(c => c.ProjectId));

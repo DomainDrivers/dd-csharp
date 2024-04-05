@@ -1,11 +1,13 @@
 ﻿using System.Linq.Expressions;
 using DomainDrivers.SmartSchedule.Allocation;
+using DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
+using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
-public class DemandSchedulingTest : IntegrationTestWithSharedApp
+public class DemandSchedulingTest
 {
     static readonly Demand Java = new Demand(Capability.Skill("JAVA"), TimeSlot.CreateDailyTimeSlotAtUtc(2022, 2, 2));
 
@@ -13,12 +15,12 @@ public class DemandSchedulingTest : IntegrationTestWithSharedApp
         DateTime.Parse("2021-01-06T00:00:00.00Z"));
 
     private readonly AllocationFacade _allocationFacade;
-    private readonly IEventsPublisher _eventsPublisher;
 
-    public DemandSchedulingTest(IntegrationTestApp testApp) : base(testApp)
+    public DemandSchedulingTest()
     {
-        _allocationFacade = Scope.ServiceProvider.GetRequiredService<AllocationFacade>();
-        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
+        _allocationFacade = new AllocationFacade(new InMemoryProjectAllocationsRepository(),
+            Substitute.For<IAvailabilityFacade>(), Substitute.For<ICapabilityFinder>(),
+            Substitute.For<IEventsPublisher>(), TimeProvider.System, new InMemoryUnitOfWork());
     }
 
     [Fact]

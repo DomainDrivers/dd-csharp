@@ -7,14 +7,14 @@ namespace DomainDrivers.SmartSchedule.Tests.Allocation.CapabilityScheduling;
 public class CapabilitySchedulingTest : IntegrationTestWithSharedApp
 {
     private readonly CapabilityScheduler _capabilityScheduler;
-    private readonly CapabilityFinder _capabilityFinder;
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly ICapabilityFinder _capabilityFinder;
+    private readonly IAvailabilityFacade _availabilityFacade;
 
     public CapabilitySchedulingTest(IntegrationTestApp testApp) : base(testApp)
     {
         _capabilityScheduler = Scope.ServiceProvider.GetRequiredService<CapabilityScheduler>();
-        _capabilityFinder = Scope.ServiceProvider.GetRequiredService<CapabilityFinder>();
-        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
+        _capabilityFinder = Scope.ServiceProvider.GetRequiredService<ICapabilityFinder>();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<IAvailabilityFacade>();
     }
 
     [Fact]

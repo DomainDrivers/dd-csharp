@@ -6,15 +6,18 @@ using NSubstitute;
 
 namespace DomainDrivers.SmartSchedule.Tests.Allocation.Cashflow;
 
-public class CashFlowFacadeTest : IntegrationTestWithSharedApp
+public class CashFlowFacadeTest
 {
+    private static readonly DateTime Now = DateTime.UtcNow;
     private readonly CashFlowFacade _cashFlowFacade;
     private readonly IEventsPublisher _eventsPublisher;
 
-    public CashFlowFacadeTest(IntegrationTestApp testApp) : base(testApp)
+    public CashFlowFacadeTest()
     {
-        _cashFlowFacade = Scope.ServiceProvider.GetRequiredService<CashFlowFacade>();
-        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
+        _eventsPublisher = Substitute.For<IEventsPublisher>();
+        var timeProvider = Substitute.For<TimeProvider>();
+        timeProvider.GetUtcNow().Returns(new DateTimeOffset(Now));
+        _cashFlowFacade = CashFlowTestConfiguration.CashFlowFacade(_eventsPublisher,timeProvider);
     }
 
     [Fact]

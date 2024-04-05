@@ -1,19 +1,18 @@
 ﻿using DomainDrivers.SmartSchedule.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Allocation.Cashflow;
 
 public class CashFlowFacade
 {
-    private readonly ICashflowDbContext _cashflowDbContext;
+    private readonly ICashflowRepository _cashflowRepository;
     private readonly IEventsPublisher _eventsPublisher;
     private readonly TimeProvider _timeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CashFlowFacade(ICashflowDbContext cashflowDbContext, IEventsPublisher eventsPublisher,
+    public CashFlowFacade(ICashflowRepository cashflowRepository, IEventsPublisher eventsPublisher,
         TimeProvider timeProvider, IUnitOfWork unitOfWork)
     {
-        _cashflowDbContext = cashflowDbContext;
+        _cashflowRepository = cashflowRepository;
         _eventsPublisher = eventsPublisher;
         _timeProvider = timeProvider;
         _unitOfWork = unitOfWork;
@@ -23,14 +22,15 @@ public class CashFlowFacade
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var cashflow = await _cashflowDbContext.Cashflows.FindAsync(projectId);
+            var cashflow = await _cashflowRepository.FindById(projectId);
             if (cashflow == null)
             {
                 cashflow = new Cashflow(projectId);
-                await _cashflowDbContext.Cashflows.AddAsync(cashflow);
+                await _cashflowRepository.Add(cashflow);
             }
 
             cashflow.Update(income, cost);
+            await _cashflowRepository.Update(cashflow);
             await _eventsPublisher.Publish(new EarningsRecalculated(projectId, cashflow.Earnings(),
                 _timeProvider.GetUtcNow().DateTime));
         });
@@ -38,13 +38,13 @@ public class CashFlowFacade
 
     public async Task<Earnings> Find(ProjectAllocationsId projectId)
     {
-        var byId = await _cashflowDbContext.Cashflows.SingleAsync(x => x.ProjectId == projectId);
+        var byId = await _cashflowRepository.GetById(projectId);
         return byId.Earnings();
     }
 
     public async Task<IDictionary<ProjectAllocationsId, Earnings>> FindAllEarnings()
     {
-        return (await _cashflowDbContext.Cashflows.ToListAsync())
+        return (await _cashflowRepository.FindAll())
             .ToDictionary(x => x.ProjectId, x => x.Earnings());
     }
 }

@@ -5,11 +5,11 @@ namespace DomainDrivers.SmartSchedule.Tests.Allocation;
 
 public class TakingRandomResourceTest : IntegrationTestWithSharedApp
 {
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
 
     public TakingRandomResourceTest(IntegrationTestApp testApp) : base(testApp)
     {
-        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<IAvailabilityFacade>();
     }
 
     [Fact]

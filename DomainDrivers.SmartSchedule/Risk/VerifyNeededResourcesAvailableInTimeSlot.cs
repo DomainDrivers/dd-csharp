@@ -7,10 +7,10 @@ namespace DomainDrivers.SmartSchedule.Risk;
 
 public class VerifyNeededResourcesAvailableInTimeSlot : INotificationHandler<NeededResourcesChosen>
 {
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
     private readonly IRiskPushNotification _riskPushNotification;
 
-    public VerifyNeededResourcesAvailableInTimeSlot(AvailabilityFacade availabilityFacade,
+    public VerifyNeededResourcesAvailableInTimeSlot(IAvailabilityFacade availabilityFacade,
         IRiskPushNotification riskPushNotification)
     {
         _availabilityFacade = availabilityFacade;

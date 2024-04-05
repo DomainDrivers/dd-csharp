@@ -5,11 +5,11 @@ namespace DomainDrivers.SmartSchedule.Allocation.CapabilityScheduling;
 
 public class CapabilityScheduler
 {
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
     private readonly AllocatableCapabilityRepository _allocatableResourceRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CapabilityScheduler(AvailabilityFacade availabilityFacade,
+    public CapabilityScheduler(IAvailabilityFacade availabilityFacade,
         AllocatableCapabilityRepository allocatableResourceRepository, IUnitOfWork unitOfWork)
     {
         _availabilityFacade = availabilityFacade;

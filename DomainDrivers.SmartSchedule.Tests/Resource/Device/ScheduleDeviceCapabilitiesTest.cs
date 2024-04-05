@@ -7,12 +7,12 @@ namespace DomainDrivers.SmartSchedule.Tests.Resource.Device;
 public class ScheduleDeviceCapabilitiesTest : IntegrationTestWithSharedApp
 {
     private readonly DeviceFacade _deviceFacade;
-    private readonly CapabilityFinder _capabilityFinder;
+    private readonly ICapabilityFinder _capabilityFinder;
 
     public ScheduleDeviceCapabilitiesTest(IntegrationTestApp testApp) : base(testApp)
     {
         _deviceFacade = Scope.ServiceProvider.GetRequiredService<DeviceFacade>();
-        _capabilityFinder = Scope.ServiceProvider.GetRequiredService<CapabilityFinder>();
+        _capabilityFinder = Scope.ServiceProvider.GetRequiredService<ICapabilityFinder>();
     }
 
     [Fact]

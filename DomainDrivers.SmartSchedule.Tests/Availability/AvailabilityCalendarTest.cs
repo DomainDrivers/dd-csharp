@@ -6,11 +6,13 @@ namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
 public class AvailabilityCalendarTest : IntegrationTestWithSharedApp
 {
-    private readonly AvailabilityFacade _availabilityFacade;
+    private readonly IAvailabilityFacade _availabilityFacade;
+    private readonly IEventsPublisher _eventsPublisher;
 
     public AvailabilityCalendarTest(IntegrationTestApp testApp) : base(testApp)
     {
-        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<AvailabilityFacade>();
+        _availabilityFacade = Scope.ServiceProvider.GetRequiredService<IAvailabilityFacade>();
+        _eventsPublisher = Scope.ServiceProvider.GetRequiredService<IEventsPublisher>();
     }
 
     [Fact]
