@@ -7,6 +7,7 @@ using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Resource.Employee;
 using DomainDrivers.SmartSchedule.Risk;
 using DomainDrivers.SmartSchedule.Shared;
+using DomainDrivers.SmartSchedule.Tests.Planning;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,7 +25,8 @@ public class RiskPeriodicCheckSagaDispatcherE2ETestApp : IntegrationTestAppBase
         {
             services
                 .Replace(ServiceDescriptor.Scoped<IRiskPushNotification>(_ => Substitute.For<IRiskPushNotification>()))
-                .Replace(ServiceDescriptor.Scoped<TimeProvider>(_ => Substitute.For<TimeProvider>()));
+                .Replace(ServiceDescriptor.Scoped<TimeProvider>(_ => Substitute.For<TimeProvider>()))
+                .Replace(ServiceDescriptor.Singleton<IProjectRepository, InMemoryProjectRepository>());;
         });
         base.ConfigureWebHost(builder);
     }

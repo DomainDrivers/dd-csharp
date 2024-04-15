@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Planning.Scheduling;
 using DomainDrivers.SmartSchedule.Shared;
@@ -7,8 +8,6 @@ namespace DomainDrivers.SmartSchedule.Planning;
 public class Project
 {
     public ProjectId Id { get; private set; } = ProjectId.NewOne();
-
-    private int _version;
 
     public string Name { get; private set; }
 
@@ -21,6 +20,19 @@ public class Project
     public ChosenResources ChosenResources { get; private set; }
 
     public Schedule Schedule { get; private set; }
+
+    [JsonConstructor]
+    public Project(string name, ParallelStagesList parallelizedStages, DemandsPerStage demandsPerStage,
+        Demands allDemands, ChosenResources chosenResources, Schedule schedule, ProjectId id)
+    {
+        Name = name;
+        ParallelizedStages = parallelizedStages;
+        DemandsPerStage = demandsPerStage;
+        AllDemands = allDemands;
+        ChosenResources = chosenResources;
+        Schedule = schedule;
+        Id = id;
+    }
 
     public Project(string name, ParallelStagesList parallelizedStages)
     {

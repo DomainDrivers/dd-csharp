@@ -2,6 +2,7 @@ using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Resource.Employee;
 using DomainDrivers.SmartSchedule.Risk;
 using DomainDrivers.SmartSchedule.Shared;
+using DomainDrivers.SmartSchedule.Tests.Planning;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
@@ -17,6 +18,7 @@ public class VerifyEnoughDemandsDuringPlanningTestApp : IntegrationTestAppBase
         builder.ConfigureServices(services =>
             services
                 .Replace(ServiceDescriptor.Singleton<IRiskPushNotification>(_ => Substitute.For<IRiskPushNotification>()))
+                .Replace(ServiceDescriptor.Scoped<IProjectRepository, InMemoryProjectRepository>())
         );
         base.ConfigureWebHost(builder);
     }

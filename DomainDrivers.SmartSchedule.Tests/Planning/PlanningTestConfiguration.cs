@@ -8,15 +8,15 @@ namespace DomainDrivers.SmartSchedule.Tests.Planning;
 
 public static class PlanningTestConfiguration
 {
-    public static PlanningFacade PlanningFacade(IEventsPublisher eventsPublisher, IProjectRepository projectRepository,
-        IUnitOfWork unitOfWork)
+    public static PlanningFacade PlanningFacadeWithInMemoryDb(IEventsPublisher eventsPublisher)
     {
         var clock = Substitute.For<TimeProvider>();
         clock.GetUtcNow().Returns(DateTimeOffset.UtcNow);
+        var projectRepository = new InMemoryProjectRepository();
         var planChosenResources = new PlanChosenResources(projectRepository, Substitute.For<IAvailabilityFacade>(),
-            eventsPublisher, clock, unitOfWork);
+            eventsPublisher, clock);
         return new PlanningFacade(projectRepository, new StageParallelization(), planChosenResources, eventsPublisher,
-            clock, unitOfWork);
+            clock);
     }
 }
 
@@ -29,13 +29,7 @@ public class InMemoryProjectRepository : IProjectRepository
         return Task.FromResult(_projects[projectId]);
     }
 
-    public Task<Project> Add(Project project)
-    {
-        _projects.Add(project.Id, project);
-        return Task.FromResult(project);
-    }
-
-    public Task<Project> Update(Project project)
+    public Task<Project> Save(Project project)
     {
         _projects[project.Id] = project;
         return Task.FromResult(project);

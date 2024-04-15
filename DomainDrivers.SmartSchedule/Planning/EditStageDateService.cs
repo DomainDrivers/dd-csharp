@@ -1,21 +1,20 @@
 using DomainDrivers.SmartSchedule.Allocation;
 using DomainDrivers.SmartSchedule.Planning.Parallelization;
 using DomainDrivers.SmartSchedule.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Planning;
 
 public class EditStageDateService
 {
     private readonly AllocationFacade _allocationFacade;
-    private readonly IPlanningDbContext _planningDbContext;
+    private readonly IProjectRepository _projectRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public EditStageDateService(AllocationFacade allocationFacade, IPlanningDbContext planningDbContext,
+    public EditStageDateService(AllocationFacade allocationFacade, IProjectRepository projectRepository,
         IUnitOfWork unitOfWork)
     {
         _allocationFacade = allocationFacade;
-        _planningDbContext = planningDbContext;
+        _projectRepository = projectRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -23,7 +22,7 @@ public class EditStageDateService
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             var schedule = project.Schedule;
             //redefine schedule
             //for each stage in schedule

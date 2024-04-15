@@ -1,5 +1,7 @@
 using System.Reflection;
+using DomainDrivers.SmartSchedule.Planning;
 using DomainDrivers.SmartSchedule.Shared;
+using DomainDrivers.SmartSchedule.Tests.Planning;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -20,6 +22,7 @@ public class IntegrationTestApp : IntegrationTestAppBase
     {
         builder.ConfigureTestServices(services =>
         {
+            services.Replace(ServiceDescriptor.Scoped<IProjectRepository, InMemoryProjectRepository>());
             services.Replace(ServiceDescriptor.Scoped<IEventsPublisher>(_ => Substitute.For<IEventsPublisher>()));
         });
         base.ConfigureWebHost(builder);
@@ -53,7 +56,7 @@ public class IntegrationTestAppBase : WebApplicationFactory<Program>, IAsyncLife
         base.ConfigureWebHost(builder);
     }
 
-    public async Task InitializeAsync()
+    public virtual async Task InitializeAsync()
     {
         await _postgres.InitializeAsync();
     }

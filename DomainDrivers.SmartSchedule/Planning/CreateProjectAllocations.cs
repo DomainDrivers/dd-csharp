@@ -1,20 +1,18 @@
 using DomainDrivers.SmartSchedule.Allocation;
 using DomainDrivers.SmartSchedule.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace DomainDrivers.SmartSchedule.Planning;
 
 public class CreateProjectAllocations
 {
     private readonly AllocationFacade _allocationFacade;
-    private readonly IPlanningDbContext _planningDbContext;
+    private readonly IProjectRepository _projectRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateProjectAllocations(AllocationFacade allocationFacade, IPlanningDbContext planningDbContext,
-        IUnitOfWork unitOfWork)
+    public CreateProjectAllocations(AllocationFacade allocationFacade, IProjectRepository projectRepository, IUnitOfWork unitOfWork)
     {
         _allocationFacade = allocationFacade;
-        _planningDbContext = planningDbContext;
+        _projectRepository = projectRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -23,7 +21,7 @@ public class CreateProjectAllocations
     {
         await _unitOfWork.InTransaction(async () =>
         {
-            var project = await _planningDbContext.Projects.SingleAsync(x => x.Id == projectId);
+            var project = await _projectRepository.GetById(projectId);
             var schedule = project.Schedule;
             //for each stage in schedule
             //create allocation

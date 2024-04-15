@@ -20,7 +20,7 @@ public class PlanningFacadeTest
     public PlanningFacadeTest()
     {
         _eventsPublisher = Substitute.For<IEventsPublisher>();
-        _projectFacade = PlanningTestConfiguration.PlanningFacade(_eventsPublisher, new InMemoryProjectRepository(), new InMemoryUnitOfWork());
+        _projectFacade = PlanningTestConfiguration.PlanningFacadeWithInMemoryDb(_eventsPublisher);
     }
 
     [Fact]

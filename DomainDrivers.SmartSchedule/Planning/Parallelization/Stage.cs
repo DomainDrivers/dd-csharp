@@ -14,7 +14,7 @@ public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceId>
     public Stage(string name) : this(name, new HashSet<Stage>(), new HashSet<ResourceId>(), TimeSpan.Zero)
     {
     }
-
+    
     public Stage DependsOn(Stage stage)
     {
         var newDependencies = new HashSet<Stage>(Dependencies) { stage };

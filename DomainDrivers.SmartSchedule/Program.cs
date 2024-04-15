@@ -16,10 +16,14 @@ using DomainDrivers.SmartSchedule.Simulation;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Quartz;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("Postgres");
-var dataSource = new NpgsqlDataSourceBuilder(connectionString)
+var postgresConnectionString = builder.Configuration.GetConnectionString("Postgres");
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnectionString!));
+
+var dataSource = new NpgsqlDataSourceBuilder(postgresConnectionString)
     .ConfigureJsonOptions(new JsonSerializerOptions() { IgnoreReadOnlyProperties = true, IgnoreReadOnlyFields = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase})
     .EnableDynamicJson()
     .Build();

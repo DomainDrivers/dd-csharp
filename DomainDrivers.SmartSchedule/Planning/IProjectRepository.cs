@@ -4,9 +4,7 @@ public interface IProjectRepository
 {
     Task<Project> GetById(ProjectId projectId);
 
-    Task<Project> Add(Project project);
-
-    Task<Project> Update(Project project);
+    Task<Project> Save(Project project);
 
     Task<IList<Project>> FindAllByIdIn(ISet<ProjectId> projectIds);
 
