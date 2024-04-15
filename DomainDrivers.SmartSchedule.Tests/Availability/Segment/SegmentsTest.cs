@@ -5,16 +5,18 @@ namespace DomainDrivers.SmartSchedule.Tests.Availability.Segment;
 
 public class SegmentsTest
 {
+    private const int FifteenMinutesSegmentDuration = 15;
+
     [Fact]
-    public void UnitHasToBeMultipleOf15Minutes()
+    public void UnitHasToBeMultipleOfDefaultSlotDurationInMinutes()
     {
         //expect
-        Assert.Throws<ArgumentException>(() => SegmentInMinutes.Of(20));
-        Assert.Throws<ArgumentException>(() => SegmentInMinutes.Of(18));
-        Assert.Throws<ArgumentException>(() => SegmentInMinutes.Of(7));
-        Assert.NotNull(SegmentInMinutes.Of(15));
-        Assert.NotNull(SegmentInMinutes.Of(30));
-        Assert.NotNull(SegmentInMinutes.Of(45));
+        Assert.Throws<ArgumentException>(() => SegmentInMinutes.Of(20, FifteenMinutesSegmentDuration));
+        Assert.Throws<ArgumentException>(() => SegmentInMinutes.Of(18, FifteenMinutesSegmentDuration));
+        Assert.Throws<ArgumentException>(() => SegmentInMinutes.Of(7, FifteenMinutesSegmentDuration));
+        Assert.NotNull(SegmentInMinutes.Of(15, FifteenMinutesSegmentDuration));
+        Assert.NotNull(SegmentInMinutes.Of(30, FifteenMinutesSegmentDuration));
+        Assert.NotNull(SegmentInMinutes.Of(45, FifteenMinutesSegmentDuration));
     }
 
     [Fact]
@@ -26,7 +28,7 @@ public class SegmentsTest
         var timeSlot = new TimeSlot(start, end);
 
         //when
-        var segments = Segments.Split(timeSlot, SegmentInMinutes.Of(15));
+        var segments = Segments.Split(timeSlot, SegmentInMinutes.Of(15, FifteenMinutesSegmentDuration));
 
         //then
         Assert.Equal(4, segments.Count);
@@ -49,7 +51,7 @@ public class SegmentsTest
         var timeSlot = new TimeSlot(start, end);
 
         //when
-        var segments = Segments.Split(timeSlot, SegmentInMinutes.Of(90));
+        var segments = Segments.Split(timeSlot, SegmentInMinutes.Of(90, FifteenMinutesSegmentDuration));
 
         //then
         Assert.Single(segments);
@@ -66,7 +68,8 @@ public class SegmentsTest
         var timeSlot = new TimeSlot(start, end);
 
         //when
-        var segment = Segments.NormalizeToSegmentBoundaries(timeSlot, SegmentInMinutes.Of(90));
+        var segment =
+            Segments.NormalizeToSegmentBoundaries(timeSlot, SegmentInMinutes.Of(90, FifteenMinutesSegmentDuration));
 
         //then
         Assert.Equal(DateTime.Parse("2023-09-09T00:00:00Z"), segment.From);
@@ -80,7 +83,7 @@ public class SegmentsTest
         var start = DateTime.Parse("2023-09-09T00:10:00Z");
         var end = DateTime.Parse("2023-09-09T00:59:00Z");
         var timeSlot = new TimeSlot(start, end);
-        var oneHour = SegmentInMinutes.Of(60);
+        var oneHour = SegmentInMinutes.Of(60, FifteenMinutesSegmentDuration);
 
         //when
         var segments = Segments.Split(timeSlot, oneHour);
@@ -90,7 +93,7 @@ public class SegmentsTest
         Assert.Equal(DateTime.Parse("2023-09-09T00:00:00Z"), segments[0].From);
         Assert.Equal(DateTime.Parse("2023-09-09T01:00:00Z"), segments[0].To);
     }
-    
+
     [Fact]
     public void SplittingIntoSegmentsWithoutNormalization()
     {
@@ -100,7 +103,7 @@ public class SegmentsTest
         var timeSlot = new TimeSlot(start, end);
 
         //when
-        var segments = SlotToSegments.Apply(timeSlot, SegmentInMinutes.Of(30));
+        var segments = SlotToSegments.Apply(timeSlot, SegmentInMinutes.Of(30, FifteenMinutesSegmentDuration));
 
         //then
         Assert.Equal(2, segments.Count);

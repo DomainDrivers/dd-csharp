@@ -105,6 +105,11 @@ public class ResourceGroupedAvailability
         return Availabilities.All(ra => ra.IsDisabledBy(owner));
     }
 
+    public bool IsEntirelyWithParentId(ResourceId parentId)
+    {
+        return Availabilities.All(ra => ra.ResourceParentId == parentId);
+    }
+
     public IList<ResourceAvailability> FindBlockedBy(Owner owner)
     {
         return Availabilities

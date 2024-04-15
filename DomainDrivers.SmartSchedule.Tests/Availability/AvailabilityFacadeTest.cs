@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using DomainDrivers.SmartSchedule.Availability;
 using DomainDrivers.SmartSchedule.Shared;
 using NSubstitute;
+using static DomainDrivers.SmartSchedule.Availability.Segment.Segments;
 
 namespace DomainDrivers.SmartSchedule.Tests.Availability;
 
@@ -47,8 +48,8 @@ public class AvailabilityFacadeTest : IntegrationTestWithSharedApp
         await _availabilityFacade.CreateResourceSlots(resourceId2, differentParentId, oneDay);
 
         //then
-        Assert.Equal(96, (await _availabilityFacade.FindByParentId(parentId, oneDay)).Size);
-        Assert.Equal(96, (await _availabilityFacade.FindByParentId(differentParentId, oneDay)).Size);
+        Assert.True((await _availabilityFacade.FindByParentId(parentId, oneDay)).IsEntirelyWithParentId(parentId));
+        Assert.True((await _availabilityFacade.FindByParentId(differentParentId, oneDay)).IsEntirelyWithParentId(differentParentId));
     }
 
     [Fact]
@@ -101,7 +102,6 @@ public class AvailabilityFacadeTest : IntegrationTestWithSharedApp
         //then
         Assert.True(result);
         var resourceAvailabilities = await _availabilityFacade.Find(resourceId, oneDay);
-        Assert.Equal(96, resourceAvailabilities.Size);
         Assert.True(resourceAvailabilities.IsDisabledEntirelyBy(owner));
     }
     
@@ -208,25 +208,26 @@ public class AvailabilityFacadeTest : IntegrationTestWithSharedApp
     {
         //given
         var resourceId = ResourceId.NewOne();
-        var oneDay = TimeSlot.CreateDailyTimeSlotAtUtc(2021, 1, 1);
-        var fifteenMinutes = new TimeSlot(oneDay.From, oneDay.From.AddMinutes(15));
+        var durationOfSevenSlots = TimeSpan.FromMinutes(7 * DefaultSegmentDurationInMinutes);
+        var sevenSlots = TimeSlot.CreateTimeSlotAtUtcOfDuration(2021, 1, 1, durationOfSevenSlots);
+        var minimumSlot = new TimeSlot(sevenSlots.From, sevenSlots.From.AddMinutes(DefaultSegmentDurationInMinutes));
         var owner = Owner.NewOne();
-        await _availabilityFacade.CreateResourceSlots(resourceId, oneDay);
+        await _availabilityFacade.CreateResourceSlots(resourceId, sevenSlots);
         //and
-        await _availabilityFacade.Block(resourceId, oneDay, owner);
+        await _availabilityFacade.Block(resourceId, sevenSlots, owner);
         //and
-        await _availabilityFacade.Release(resourceId, fifteenMinutes, owner);
+        await _availabilityFacade.Release(resourceId, minimumSlot, owner);
 
         //when
         var newRequester = Owner.NewOne();
-        var result = await _availabilityFacade.Block(resourceId, fifteenMinutes, newRequester);
+        var result = await _availabilityFacade.Block(resourceId, minimumSlot, newRequester);
 
         //then
         Assert.True(result);
-        var dailyCalendar = await _availabilityFacade.LoadCalendar(resourceId, oneDay);
+        var dailyCalendar = await _availabilityFacade.LoadCalendar(resourceId, sevenSlots);
         Assert.Empty(dailyCalendar.AvailableSlots());
-        Assert.True(dailyCalendar.TakenBy(owner).SequenceEqual(oneDay.LeftoverAfterRemovingCommonWith(fifteenMinutes)));
-        Assert.True(dailyCalendar.TakenBy(newRequester).SequenceEqual(new[] { fifteenMinutes }));
+        Assert.True(dailyCalendar.TakenBy(owner).SequenceEqual(sevenSlots.LeftoverAfterRemovingCommonWith(minimumSlot)));
+        Assert.True(dailyCalendar.TakenBy(newRequester).SequenceEqual(new[] { minimumSlot }));
     }
 
     [Fact]

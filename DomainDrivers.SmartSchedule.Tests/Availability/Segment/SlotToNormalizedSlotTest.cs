@@ -5,6 +5,8 @@ namespace DomainDrivers.SmartSchedule.Tests.Availability.Segment;
 
 public class SlotToNormalizedSlotTest
 {
+    private const int FifteenMinutesSegmentDuration = 15;
+
     [Fact]
     public void HasNoEffectWhenSlotAlreadyNormalized()
     {
@@ -12,7 +14,7 @@ public class SlotToNormalizedSlotTest
         var start = DateTime.Parse("2023-09-09T00:00:00Z");
         var end = DateTime.Parse("2023-09-09T01:00:00Z");
         var timeSlot = new TimeSlot(start, end);
-        var oneHour = SegmentInMinutes.Of(60);
+        var oneHour = SegmentInMinutes.Of(60, FifteenMinutesSegmentDuration);
 
         //when
         var normalized = SlotToNormalizedSlot.Apply(timeSlot, oneHour);
@@ -28,7 +30,7 @@ public class SlotToNormalizedSlotTest
         var start = DateTime.Parse("2023-09-09T00:10:00Z");
         var end = DateTime.Parse("2023-09-09T00:59:00Z");
         var timeSlot = new TimeSlot(start, end);
-        var oneHour = SegmentInMinutes.Of(60);
+        var oneHour = SegmentInMinutes.Of(60, FifteenMinutesSegmentDuration);
 
         //when
         var normalized = SlotToNormalizedSlot.Apply(timeSlot, oneHour);
@@ -45,7 +47,7 @@ public class SlotToNormalizedSlotTest
         var start = DateTime.Parse("2023-09-09T00:29:00Z");
         var end = DateTime.Parse("2023-09-09T00:31:00Z");
         var timeSlot = new TimeSlot(start, end);
-        var oneHour = SegmentInMinutes.Of(60);
+        var oneHour = SegmentInMinutes.Of(60, FifteenMinutesSegmentDuration);
 
         //when
         var normalized = SlotToNormalizedSlot.Apply(timeSlot, oneHour);
@@ -65,7 +67,7 @@ public class SlotToNormalizedSlotTest
         var start2 = DateTime.Parse("2023-09-09T00:30:00Z");
         var end2 = DateTime.Parse("2023-09-09T00:45:00Z");
         var timeSlot2 = new TimeSlot(start2, end2);
-        var fifteenMinutes = SegmentInMinutes.Of(15);
+        var fifteenMinutes = SegmentInMinutes.Of(15, FifteenMinutesSegmentDuration);
 
         //when
         var normalized = SlotToNormalizedSlot.Apply(timeSlot, fifteenMinutes);

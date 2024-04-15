@@ -4,7 +4,7 @@ namespace DomainDrivers.SmartSchedule.Availability.Segment;
 
 public static class Segments
 {
-    public const int DefaultSegmentDurationInMinutes = 15;
+    public const int DefaultSegmentDurationInMinutes = 60;
 
     public static IList<TimeSlot> Split(TimeSlot timeSlot, SegmentInMinutes unit)
     {

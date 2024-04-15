@@ -9,8 +9,13 @@ public record TimeSlot(DateTime From, DateTime To)
 
     public static TimeSlot CreateDailyTimeSlotAtUtc(int year, int month, int day)
     {
+        return CreateTimeSlotAtUtcOfDuration(year, month, day, TimeSpan.FromDays(1));
+    }
+
+    public static TimeSlot CreateTimeSlotAtUtcOfDuration(int year, int month, int day, TimeSpan duration)
+    {
         var thisDay = new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
-        return new TimeSlot(thisDay, thisDay.AddDays(1));
+        return new TimeSlot(thisDay, thisDay.Add(duration));
     }
 
     public static TimeSlot CreateMonthlyTimeSlotAtUtc(int year, int month)
