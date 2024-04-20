@@ -23,6 +23,9 @@ public class ArchitectureDependencyTest
     private static readonly IObjectProvider<IType> SharedLayer =
         Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Shared").As("Shared");
 
+    private static readonly IObjectProvider<IType> SimulationLayer =
+        Types().That().ResideInNamespace("DomainDrivers.SmartSchedule.Simulation").As("Simulation");
+
     [Fact]
     public void CheckDependencies()
     {
@@ -35,6 +38,11 @@ public class ArchitectureDependencyTest
         Types().That().Are(SorterLayer)
             .Should().NotDependOnAny(
                 Types().That().AreNot(SorterLayer)
+                    .And().AreNot(SharedLayer))
+            .Check(Architecture);
+        Types().That().Are(SimulationLayer)
+            .Should().NotDependOnAny(
+                Types().That().AreNot(SimulationLayer)
                     .And().AreNot(SharedLayer))
             .Check(Architecture);
     }
