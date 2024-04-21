@@ -2,6 +2,11 @@
 
 public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceName> Resources, TimeSpan Duration)
 {
+    public Stage OfDuration(TimeSpan duration)
+    {
+        return new Stage(StageName, Dependencies, Resources, duration);
+    }
+
     public Stage(string name) : this(name, new HashSet<Stage>(), new HashSet<ResourceName>(), TimeSpan.Zero)
     {
     }
@@ -36,5 +41,3 @@ public record Stage(string StageName, ISet<Stage> Dependencies, ISet<ResourceNam
         return StageName.GetHashCode();
     }
 }
-
-public record ResourceName(string Name);
